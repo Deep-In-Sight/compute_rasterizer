@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include <memory>
 
 using std::cout;
 using std::endl;

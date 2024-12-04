@@ -1,8 +1,8 @@
-build/bin/
-build/obj/
-build/Debug
-build/Release
-build/.vs
+buildvs/bin/
+buildvs/obj/
+buildvs/Debug
+buildvs/Release
+buildvs/.vs
 libs/openvr/samples
 libs/openvr_newer
 tools/sort_points/bin/
