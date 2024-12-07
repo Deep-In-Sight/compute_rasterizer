@@ -106,17 +106,6 @@ struct Renderer{
 
 	void init();
 
-	shared_ptr<Texture> createTexture(int width, int height, GLuint colorType);
-
-	shared_ptr<Framebuffer> createFramebuffer(int width, int height);
-
-	
-
-	//inline int64_t getAvailableGpuMemory(){
-	//	GLint available = 0;
-	//	glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &available);
-	//}
-
 	void loop(function<void(void)> update, function<void(void)> render);
 
 	void drawBox(glm::dvec3 position, glm::dvec3 scale, glm::ivec3 color);

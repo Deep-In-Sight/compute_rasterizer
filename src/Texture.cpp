@@ -1,20 +1,14 @@
 #include "Texture.h"
+#include "GL/glew.h"
 
-#include "Renderer.h"
-
-shared_ptr<Texture> Texture::create(int width, int height, GLuint colorType, Renderer* renderer){
-
+std::shared_ptr<Texture> Texture::create(int width, int height, GLuint colorType){
 	GLuint handle;
 	glCreateTextures(GL_TEXTURE_2D, 1, &handle);
 
-	auto texture = make_shared<Texture>();
-	texture->renderer = renderer;
+	auto texture = std::make_shared<Texture>();
 	texture->handle = handle;
 	texture->colorType = colorType;
-
 	texture->setSize(width, height);
-
-	//glTextureSubImage2D(handle, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	return texture;
 }
@@ -38,5 +32,4 @@ void Texture::setSize(int width, int height) {
 		this->width = width;
 		this->height = height;
 	}
-
 }

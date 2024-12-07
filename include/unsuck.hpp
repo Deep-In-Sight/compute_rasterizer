@@ -386,7 +386,7 @@ inline shared_ptr<Buffer> readBinaryFile(string path) {
 	//vector<uint8_t> buffer(size);
 	auto buffer = make_shared<Buffer>(size);
 
-	fread(buffer->data, 1, size, file);
+	auto r = fread(buffer->data, 1, size, file);
 	fclose(file);
 
 	return buffer;
@@ -450,7 +450,7 @@ inline shared_ptr<Buffer> readBinaryFile(string path, uint64_t start, uint64_t s
 		//file.seekg(start, ios::beg);
 		//file.read(reinterpret_cast<char*>(buffer.data()), clampedSize);
 		fseek_64_all_platforms(file, start, SEEK_SET);
-		fread(buffer->data, 1, clampedSize, file);
+		auto r = fread(buffer->data, 1, clampedSize, file);
 		fclose(file);
 
 		return buffer;
@@ -459,7 +459,7 @@ inline shared_ptr<Buffer> readBinaryFile(string path, uint64_t start, uint64_t s
 		//file.seekg(start, ios::beg);
 		//file.read(reinterpret_cast<char*>(buffer.data()), size);
 		fseek_64_all_platforms(file, start, SEEK_SET);
-		fread(buffer->data, 1, size, file);
+		auto r = fread(buffer->data, 1, size, file);
 		fclose(file);
 
 		return buffer;
@@ -477,11 +477,11 @@ inline void readBinaryFile(string path, uint64_t start, uint64_t size, void* tar
 		auto clampedSize = totalSize - start;
 
 		fseek_64_all_platforms(file, start, SEEK_SET);
-		fread(target, 1, clampedSize, file);
+		auto r = fread(target, 1, clampedSize, file);
 		fclose(file);
 	} else {
 		fseek_64_all_platforms(file, start, SEEK_SET);
-		fread(target, 1, size, file);
+		auto r = fread(target, 1, size, file);
 		fclose(file);
 	}
 }

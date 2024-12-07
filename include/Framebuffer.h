@@ -4,31 +4,17 @@
 #include <vector>
 #include <memory>
 
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-
-#include "Texture.h"
-
-using namespace std;
-
-struct Renderer;
-
+struct Texture;
 struct Framebuffer {
+	Framebuffer(int width, int height);
 
-	vector<shared_ptr<Texture>> colorAttachments;
-	shared_ptr<Texture> depth;
-	GLuint handle = -1;
-	Renderer* renderer = nullptr;
+	std::vector<std::shared_ptr<Texture>> colorAttachments;
+	std::shared_ptr<Texture> depth;
+	unsigned int handle = -1;
 
 	int width = 0;
 	int height = 0;
 
-	Framebuffer() {
-		
-	}
-
-	static shared_ptr<Framebuffer> create(Renderer* renderer);
-
+	static std::shared_ptr<Framebuffer> create(int width, int height);
 	void setSize(int width, int height);
-
 };
