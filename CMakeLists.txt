@@ -31,6 +31,7 @@ find_package(CUDA REQUIRED)
 set(MAIN_SRCS 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Framebuffer.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLTimerQueries.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/GLBuffer.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OpenVRHelper.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OrbitControls.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp 

@@ -93,16 +93,16 @@ struct ComputeLoopLas : public Method{
 		csRender = new Shader({ {"./modules/compute_loop_las/render.cs", GL_COMPUTE_SHADER} });
 		csResolve = new Shader({ {"./modules/compute_loop_las/resolve.cs", GL_COMPUTE_SHADER} });
 		
-		ssFramebuffer = renderer->createBuffer(8 * 2048 * 2048);
+		ssFramebuffer = createBuffer(8 * 2048 * 2048);
 
 		this->renderer = renderer;
 
 		ssFilesBuffer = make_shared<Buffer>(10'000 * 128);
 
-		ssDebug = renderer->createBuffer(256);
-		ssBoundingBoxes = renderer->createBuffer(48 * 1'000'000);
-		ssFiles = renderer->createBuffer(ssFilesBuffer->size);
-		uniformBuffer = renderer->createUniformBuffer(512);
+		ssDebug = createBuffer(256);
+		ssBoundingBoxes = createBuffer(48 * 1'000'000);
+		ssFiles = createBuffer(ssFilesBuffer->size);
+		uniformBuffer = createUniformBuffer(512);
 
 		GLuint zero = 0;
 		glClearNamedBufferData(ssDebug.handle, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
@@ -134,7 +134,7 @@ struct ComputeLoopLas : public Method{
 			// make new buffer a little larger to have some reserves when users enlarge the window
 			int newBufferSize = 1.5 * double(8 * fbo->width * fbo->height);
 
-			ssFramebuffer = renderer->createBuffer(newBufferSize);
+			ssFramebuffer = createBuffer(newBufferSize);
 		}
 
 		// Update Uniform Buffer

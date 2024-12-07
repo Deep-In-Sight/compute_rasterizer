@@ -27,12 +27,12 @@ void ComputeLasData::load(Renderer* renderer){
 
 	{ // create buffers
 		int numBatches = (this->numPoints / POINTS_PER_WORKGROUP) + 1;
-		this->ssBatches = renderer->createBuffer(64 * numBatches);
-		this->ssXyz_12b = renderer->createSparseBuffer(4 * this->numPoints);
-		this->ssXyz_8b = renderer->createSparseBuffer(4 * this->numPoints);
-		this->ssXyz_4b = renderer->createSparseBuffer(4 * this->numPoints);
-		this->ssColors = renderer->createSparseBuffer(4 * this->numPoints);
-		this->ssLoadBuffer = renderer->createBuffer(this->bytesPerPoint * MAX_POINTS_PER_BATCH);
+		this->ssBatches = createBuffer(64 * numBatches);
+		this->ssXyz_12b = createSparseBuffer(4 * this->numPoints);
+		this->ssXyz_8b = createSparseBuffer(4 * this->numPoints);
+		this->ssXyz_4b = createSparseBuffer(4 * this->numPoints);
+		this->ssColors = createSparseBuffer(4 * this->numPoints);
+		this->ssLoadBuffer = createBuffer(this->bytesPerPoint * MAX_POINTS_PER_BATCH);
 
 		GLuint zero = 0;
 		glClearNamedBufferData(this->ssBatches.handle, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
@@ -140,7 +140,7 @@ void ComputeLasData::process(Renderer* renderer){
 		csLoad = new Shader({ {"./modules/compute/computeLasLoader.cs", GL_COMPUTE_SHADER} });
 	}
 
-	static GLBuffer ssDebug = renderer->createBuffer(256);
+	static GLBuffer ssDebug = createBuffer(256);
 
 	GLuint zero = 0;
 	glClearNamedBufferData(ssDebug.handle, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);

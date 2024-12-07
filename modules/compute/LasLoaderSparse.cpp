@@ -438,12 +438,12 @@ LasLoaderSparse::LasLoaderSparse(shared_ptr<Renderer> renderer){
 	PAGE_SIZE = pageSize;
 
 	{ // create (sparse) buffers
-		this->ssBatches = renderer->createBuffer(64 * 200'000);
-		this->ssXyzLow = renderer->createSparseBuffer(4 * MAX_POINTS);
-		this->ssXyzMed = renderer->createSparseBuffer(4 * MAX_POINTS);
-		this->ssXyzHig = renderer->createSparseBuffer(4 * MAX_POINTS);
-		this->ssColors = renderer->createSparseBuffer(4 * MAX_POINTS);
-		this->ssLoadBuffer = renderer->createBuffer(200 * MAX_POINTS_PER_BATCH);
+		this->ssBatches = createBuffer(64 * 200'000);
+		this->ssXyzLow = createSparseBuffer(4 * MAX_POINTS);
+		this->ssXyzMed = createSparseBuffer(4 * MAX_POINTS);
+		this->ssXyzHig = createSparseBuffer(4 * MAX_POINTS);
+		this->ssColors = createSparseBuffer(4 * MAX_POINTS);
+		this->ssLoadBuffer = createBuffer(200 * MAX_POINTS_PER_BATCH);
 
 		GLuint zero = 0;
 		glClearNamedBufferData(this->ssBatches.handle, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
