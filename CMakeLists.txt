@@ -71,11 +71,6 @@ set(INCLUDE_DIRS
     ${CUDA_INCLUDE_DIRS}
 )
 
-message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
-message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
-message(STATUS "CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY}")
-
-
 set(LIBRARIES 
     laszip
     openvr_api
@@ -83,7 +78,6 @@ set(LIBRARIES
     OpenGL::GL
     cuda
     ${CUDA_LIBRARIES}
-    ${CUDA_CUDART_LIBRARY}
 )
 
 # Add the executable

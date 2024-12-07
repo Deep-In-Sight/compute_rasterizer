@@ -175,7 +175,7 @@ struct Renderer{
 
 	void setVR(bool enable);
 
-	void onFileDrop(function<void(vector<string>)> callback){
+	void addFileDropCallback(function<void(vector<string>)> callback){
 		fileDropListeners.push_back(callback);
 	}
 

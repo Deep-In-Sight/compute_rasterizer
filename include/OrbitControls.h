@@ -6,6 +6,7 @@
 #include "glm/common.hpp"
 #include "glm/matrix.hpp"
 #include <glm/gtx/transform.hpp>
+#include <Camera.h>
 
 using namespace std;
 
@@ -21,9 +22,14 @@ struct OrbitControls{
 	bool isRightDown = false;
 
 	glm::dvec2 mousePos;
+	Camera* camera;
 
 	OrbitControls(){
 	
+	}
+
+	void setCamera(Camera* camera){
+		this->camera = camera;
 	}
 
 	glm::dvec3 getDirection(){
@@ -132,6 +138,9 @@ struct OrbitControls{
 		);
 
 		world = translateTarget * rotYaw * rotPitch * flip * translateRadius;
+		camera->world = world;
+		camera->position = world * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+		camera->update();
 	}
 
 };
