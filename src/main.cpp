@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "Runtime.h"
+#include <OrbitControls.h>
 #include <cuda.h>
 #include <iostream>
 
@@ -17,7 +18,7 @@ int main()
 
     cout << std::setprecision(2) << std::fixed;
 
-    auto renderer = make_shared<Renderer>();
+    auto renderer = Renderer::Instance();
     // renderer->init();
 
     // Creating a CUDA context
@@ -74,7 +75,7 @@ int main()
     });
 
     { // 4-4-4 byte format
-        auto computeLoopLas = new ComputeLoopLas(renderer.get(), lasLoaderSparse);
+        auto computeLoopLas = new ComputeLoopLas(renderer, lasLoaderSparse);
         Runtime::addMethod(computeLoopLas);
         Runtime::setSelectedMethod("loop_las");
     }
@@ -85,7 +86,7 @@ int main()
         auto selected = Runtime::getSelectedMethod();
         if (selected)
         {
-            selected->update(renderer.get());
+            selected->update(renderer);
         }
     };
 
@@ -104,7 +105,7 @@ int main()
             auto selected = Runtime::getSelectedMethod();
             if (selected)
             {
-                selected->render(renderer.get());
+                selected->render(renderer);
             }
         }
     };

@@ -41,7 +41,7 @@ void _drawPoints(Camera *camera, void *points, int numPoints)
 
     glm::mat4 view = camera->view;
     glm::mat4 proj = camera->proj;
-    dmat4 viewProj = camera->proj * camera->view;
+    glm::dmat4 viewProj = camera->proj * camera->view;
     // glUniformMatrix4fv(0, 1, GL_FALSE, &view[0][0]);
     // glUniformMatrix4fv(1, 1, GL_FALSE, &proj[0][0]);
     glUniformMatrix4dv(0, 1, GL_FALSE, &viewProj[0][0]);

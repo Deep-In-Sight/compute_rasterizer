@@ -1,17 +1,55 @@
 
+#include "Renderer.h"
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+#include "GLTimerQueries.h"
+#include "Runtime.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "implot.h"
+#include "implot_internal.h"
+#include <Camera.h>
+#include <Debug.h>
+#include <Framebuffer.h>
+#include <OrbitControls.h>
 #include <filesystem>
 
-#include "GLTimerQueries.h"
-#include "Renderer.h"
-#include "Runtime.h"
-#include "drawBoundingBoxes.h"
-#include "drawBoundingBoxesIndirect.h"
-#include "drawBoxes.h"
-#include "drawPoints.h"
+// ScrollingBuffer from ImPlot implot_demo.cpp.
+// MIT License
+// url: https://github.com/epezent/implot
+struct ScrollingBuffer
+{
+    int MaxSize;
+    int Offset;
+    ImVector<ImVec2> Data;
+    ScrollingBuffer()
+    {
+        MaxSize = 2000;
+        Offset = 0;
+        Data.reserve(MaxSize);
+    }
+    void AddPoint(float x, float y)
+    {
+        if (Data.size() < MaxSize)
+            Data.push_back(ImVec2(x, y));
+        else
+        {
+            Data[Offset] = ImVec2(x, y);
+            Offset = (Offset + 1) % MaxSize;
+        }
+    }
+    void Erase()
+    {
+        if (Data.size() > 0)
+        {
+            Data.shrink(0);
+            Offset = 0;
+        }
+    }
+};
 
 namespace fs = std::filesystem;
-
-auto _controls = make_shared<OrbitControls>();
 
 static void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                    const GLchar *message, const void *userParam)
@@ -56,7 +94,7 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 
     Runtime::mousePosition = {xpos, ypos};
 
-    _controls->onMouseMove(xpos, ypos);
+    Renderer::Instance()->controls->onMouseMove(xpos, ypos);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
@@ -67,15 +105,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
         return;
     }
 
-    _controls->onMouseScroll(xoffset, yoffset);
-}
-
-void drop_callback(GLFWwindow *window, int count, const char **paths)
-{
-    for (int i = 0; i < count; i++)
-    {
-        cout << paths[i] << endl;
-    }
+    Renderer::Instance()->controls->onMouseScroll(xoffset, yoffset);
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -101,14 +131,35 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         Runtime::mouseButtons = Runtime::mouseButtons & mask;
     }
 
-    _controls->onMouseButton(button, action, mods);
+    Renderer::Instance()->controls->onMouseButton(button, action, mods);
+}
+
+void drop_callback(GLFWwindow *, int count, const char **paths)
+{
+    vector<string> files;
+    for (int i = 0; i < count; i++)
+    {
+        string file = paths[i];
+        files.push_back(file);
+    }
+
+    for (auto &listener : Renderer::Instance()->fileDropListeners)
+    {
+        listener(files);
+    }
+}
+
+Renderer *Renderer::Instance()
+{
+    static Renderer instance;
+    return &instance;
 }
 
 Renderer::Renderer()
 {
-    this->controls = _controls;
+    controls = std::make_shared<OrbitControls>();
     camera = make_shared<Camera>();
-    _controls->setCamera(camera.get());
+    controls->setCamera(camera.get());
 
     init();
 
@@ -132,27 +183,12 @@ void Renderer::init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
     glfwWindowHint(GLFW_DECORATED, true);
 
     int numMonitors;
     GLFWmonitor **monitors = glfwGetMonitors(&numMonitors);
 
     cout << "<create windows>" << endl;
-    // if (numMonitors > 1) {
-    //	const GLFWvidmode * modeLeft = glfwGetVideoMode(monitors[0]);
-    //	const GLFWvidmode * modeRight = glfwGetVideoMode(monitors[1]);
-
-    //	window = glfwCreateWindow(modeRight->width, modeRight->height - 300, "Simple example", nullptr, nullptr);
-
-    //	if (!window) {
-    //		glfwTerminate();
-    //		exit(EXIT_FAILURE);
-    //	}
-
-    //	glfwSetWindowPos(window, modeLeft->width, 0);
-    //}
-    // else
     {
         const GLFWvidmode *mode = glfwGetVideoMode(monitors[0]);
 
@@ -172,22 +208,7 @@ void Renderer::init()
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    // glfwSetDropCallback(window, drop_callback);
-
-    static Renderer *ref = this;
-    glfwSetDropCallback(window, [](GLFWwindow *, int count, const char **paths) {
-        vector<string> files;
-        for (int i = 0; i < count; i++)
-        {
-            string file = paths[i];
-            files.push_back(file);
-        }
-
-        for (auto &listener : ref->fileDropListeners)
-        {
-            listener(files);
-        }
-    });
+    glfwSetDropCallback(window, drop_callback);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
@@ -374,43 +395,7 @@ void ImGuiUpdate()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Renderer::drawBox(glm::dvec3 position, glm::dvec3 scale, glm::ivec3 color)
+void Renderer::addFileDropCallback(std::function<void(std::vector<std::string>)> callback)
 {
-
-    Box box;
-    box.min = position - scale / 2.0;
-    box.max = position + scale / 2.0;
-    ;
-    box.color = color;
-
-    drawQueue.boxes.push_back(box);
-
-    //_drawBox(camera.get(), position, scale, color);
-}
-
-void Renderer::drawBoundingBox(glm::dvec3 position, glm::dvec3 scale, glm::ivec3 color)
-{
-
-    Box box;
-    box.min = position - scale / 2.0;
-    box.max = position + scale / 2.0;
-    ;
-    box.color = color;
-
-    drawQueue.boundingBoxes.push_back(box);
-}
-
-void Renderer::drawBoundingBoxes(Camera *camera, GLBuffer buffer)
-{
-    _drawBoundingBoxesIndirect(camera, buffer);
-}
-
-void Renderer::drawPoints(void *points, int numPoints)
-{
-    _drawPoints(camera.get(), points, numPoints);
-}
-
-void Renderer::drawPoints(GLuint vao, GLuint vbo, int numPoints)
-{
-    _drawPoints(camera.get(), vao, vbo, numPoints);
+    fileDropListeners.push_back(callback);
 }

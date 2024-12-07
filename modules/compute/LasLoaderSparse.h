@@ -12,9 +12,11 @@
 #include "glm/vec3.hpp"
 #include "laszip_api.h"
 #include "unsuck.hpp"
+#include <GLBuffer.h>
 #include <glm/gtx/transform.hpp>
 
 using namespace std;
+using glm::dvec3;
 using glm::vec3;
 
 namespace fs = std::filesystem;
@@ -84,7 +86,7 @@ struct LasLoaderSparse
     int64_t bytesReserved = 0;
     int64_t numFiles = 0;
 
-    shared_ptr<Renderer> renderer = nullptr;
+    Renderer *renderer = nullptr;
 
     GLBuffer ssBatches;
     GLBuffer ssXyzLow;
@@ -93,7 +95,7 @@ struct LasLoaderSparse
     GLBuffer ssColors;
     GLBuffer ssLoadBuffer;
 
-    LasLoaderSparse(shared_ptr<Renderer> renderer);
+    LasLoaderSparse(Renderer *renderer);
 
     void add(vector<string> files, std::function<void(vector<shared_ptr<LasFile>>)> callback);
 

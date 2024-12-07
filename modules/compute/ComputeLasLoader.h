@@ -9,9 +9,11 @@
 #include "glm/matrix.hpp"
 #include "glm/vec3.hpp"
 #include "unsuck.hpp"
+#include <GLBuffer.h>
 #include <glm/gtx/transform.hpp>
 
 using namespace std;
+using glm::dvec3;
 using glm::vec3;
 
 struct ComputeLasData : public Resource

@@ -452,7 +452,7 @@ shared_ptr<LoadResult> loadLaz(shared_ptr<LasFile> lasfile, int64_t firstPoint, 
     return result;
 }
 
-LasLoaderSparse::LasLoaderSparse(shared_ptr<Renderer> renderer)
+LasLoaderSparse::LasLoaderSparse(Renderer *renderer)
 {
 
     this->renderer = renderer;

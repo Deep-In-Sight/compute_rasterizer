@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "compute/ComputeLasLoader.h"
 #include "compute/Resources.h"
+#include <Debug.h>
 
 using namespace std;
 
