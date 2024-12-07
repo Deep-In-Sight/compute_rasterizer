@@ -28,8 +28,6 @@
 #include "Texture.h"
 #include "unsuck.hpp"
 
-#include "OpenVRHelper.h"
-
 using namespace std;
 using glm::dmat4;
 using glm::dvec3;
@@ -124,10 +122,6 @@ struct Renderer
     void drawPoints(void *points, int numPoints);
 
     void drawPoints(GLuint vao, GLuint vbo, int numPoints);
-
-    void toggleVR();
-
-    void setVR(bool enable);
 
     void addFileDropCallback(function<void(vector<string>)> callback)
     {

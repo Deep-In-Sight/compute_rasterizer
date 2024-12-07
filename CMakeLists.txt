@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # includes the bundled libs
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/src)
 set(GLM_STATIC_LIBRARY_ENABLE ON)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm)
 
@@ -33,7 +32,6 @@ set(MAIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Framebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLTimerQueries.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLBuffer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OpenVRHelper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OrbitControls.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
@@ -66,11 +64,10 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/json
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/headers
     ${GLFW3_INCLUDE_DIRS}
     ${CUDA_INCLUDE_DIRS})
 
-set(LIBRARIES laszip openvr_api glfw OpenGL::GL cuda ${CUDA_LIBRARIES})
+set(LIBRARIES laszip glfw OpenGL::GL cuda ${CUDA_LIBRARIES})
 
 # Add the executable
 add_executable(ComputeRasterizerMain ${SOURCES}
