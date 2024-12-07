@@ -9,19 +9,20 @@
 
 #include "Renderer.h"
 
-enum ResourceState { 
-	UNLOADED,
-	LOADING,
-	LOADED,
-	UNLOADING
+enum ResourceState
+{
+    UNLOADED,
+    LOADING,
+    LOADED,
+    UNLOADING
 };
 
-struct Resource{
+struct Resource
+{
 
-	ResourceState state = ResourceState::UNLOADED;
+    ResourceState state = ResourceState::UNLOADED;
 
-	virtual void load(Renderer* renderer) = 0;
-	virtual void unload(Renderer* renderer) = 0;
-	virtual void process(Renderer* renderer) = 0;
-
+    virtual void load(Renderer *renderer) = 0;
+    virtual void unload(Renderer *renderer) = 0;
+    virtual void process(Renderer *renderer) = 0;
 };

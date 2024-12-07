@@ -217,7 +217,6 @@ void Renderer::init()
     }
 }
 
-
 void ImGuiUpdate();
 void Renderer::loop(function<void(void)> update, function<void(void)> render)
 {

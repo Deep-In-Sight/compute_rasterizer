@@ -3,83 +3,85 @@
 #pragma once
 
 #include "GL/glew.h"
-//#include "GLFW/glfw3.h"
+// #include "GLFW/glfw3.h"
 
 #include <iostream>
+#include <memory>
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <queue>
-#include <memory>
 
 using std::cout;
+using std::deque;
 using std::endl;
+using std::queue;
+using std::shared_ptr;
 using std::string;
 using std::unordered_map;
 using std::vector;
-using std::deque;
-using std::queue;
-using std::shared_ptr;
 
-
-struct GLTimestamp {
-	string label;
-	GLuint handle = -1;
-	int age = 0;
-	bool shouldPrint = false;
+struct GLTimestamp
+{
+    string label;
+    GLuint handle = -1;
+    int age = 0;
+    bool shouldPrint = false;
 };
 
-struct GLFrame {
+struct GLFrame
+{
 
-	vector<GLTimestamp> timestamps;
-
+    vector<GLTimestamp> timestamps;
 };
 
-struct Timestamp {
-	string label;
-	uint64_t nanos;
-	bool shouldPrint = false;
+struct Timestamp
+{
+    string label;
+    uint64_t nanos;
+    bool shouldPrint = false;
 };
 
-struct Duration {
-	string label;
-	uint64_t nanos;
+struct Duration
+{
+    string label;
+    uint64_t nanos;
 };
 
-struct GLTStats {
-	string label;
-	double min = 10000000000.0;
-	double max = 0.0;
-	double sum = 0.0;
-	double count = 0.0;
+struct GLTStats
+{
+    string label;
+    double min = 10000000000.0;
+    double max = 0.0;
+    double sum = 0.0;
+    double count = 0.0;
 };
 
-struct GLTimerQueries {
+struct GLTimerQueries
+{
 
-	bool enabled = true;
-	//vector<GLTimestamp> timestamps;
-	GLFrame currentFrame;
+    bool enabled = true;
+    // vector<GLTimestamp> timestamps;
+    GLFrame currentFrame;
 
-	// store some frames, evaluate timestamps after some frames
-	queue<GLFrame> frames;
+    // store some frames, evaluate timestamps after some frames
+    queue<GLFrame> frames;
 
-	vector<Timestamp> timings;
-	vector<Duration> durations;
-	unordered_map<string, GLTStats> stats_buildup;
-	unordered_map<string, GLTStats> stats;
+    vector<Timestamp> timings;
+    vector<Duration> durations;
+    unordered_map<string, GLTStats> stats_buildup;
+    unordered_map<string, GLTStats> stats;
 
-	static GLTimerQueries* instance() {
+    static GLTimerQueries *instance()
+    {
 
-		static GLTimerQueries* _instance = new GLTimerQueries();
+        static GLTimerQueries *_instance = new GLTimerQueries();
 
-		return _instance;
-	}
+        return _instance;
+    }
 
-	static void frameStart();
-	static void frameEnd();
-	static void timestamp(string label);
-	static void timestampPrint(string label);
-
-
+    static void frameStart();
+    static void frameEnd();
+    static void timestamp(string label);
+    static void timestampPrint(string label);
 };
-

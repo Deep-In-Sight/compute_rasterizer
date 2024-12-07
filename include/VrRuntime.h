@@ -1,17 +1,17 @@
 //// adapted and copied from hellovr_opengl_main.cpp
 //// LICENSING this file under the same license, see libs/openvr/LICENSE
-//// 
+////
 //
-//#pragma once
+// #pragma once
 //
-//#include <iostream>
+// #include <iostream>
 //
-//#include <openvr.h>
+// #include <openvr.h>
 //
-//using namespace std;
+// using namespace std;
 //
 //
-//struct VrRuntime{
+// struct VrRuntime{
 //
 //	vr::IVRSystem *vrSystem = nullptr;
 //	string strDriver;
@@ -45,7 +45,7 @@
 //
 //		if (error != vr::VRInitError_None){
 //			vrSystem = nullptr;
-//			
+//
 //			std::cout << "failed to create VR runtime" << std::endl;
 //
 //			return;
@@ -54,7 +54,7 @@
 //		if (!vr::VRCompositor()){
 //
 //			std::cout << "failed to initialize compositor" << std::endl;
-//			
+//
 //			return;
 //		}
 //
@@ -69,7 +69,7 @@
 //		poseLeft = getEyePose(vr::Eye_Left);
 //		poseRight = getEyePose(vr::Eye_Right);
 //
-//		
+//
 //	}
 //
 //	void submit(GLuint left, GLuint right){
@@ -109,11 +109,11 @@
 //		m_strPoseClasses = "";
 //
 //		for ( int nDevice = 0; nDevice < vr::k_unMaxTrackedDeviceCount; ++nDevice ){
-//			
+//
 //			if ( trackedDevicePose[nDevice].bPoseIsValid ){
 //				m_iValidPoseCount++;
 //				m_rmat4DevicePose[nDevice] = toDmat4(trackedDevicePose[nDevice].mDeviceToAbsoluteTracking);
-//				
+//
 //				if (m_rDevClassChar[nDevice]==0){
 //
 //					switch (vrSystem->GetTrackedDeviceClass(nDevice))
@@ -167,13 +167,13 @@
 //	}
 //
 //	void processVrEvent(const vr::VREvent_t & event){
-//		
+//
 //		if(event.eventType == vr::VREvent_TrackedDeviceDeactivated){
 //			std::cout << "Device detached: " << event.trackedDeviceIndex << std::endl;
 //		}else if(event.eventType == vr::VREvent_TrackedDeviceUpdated){
 //			std::cout << "Device updated: " << event.trackedDeviceIndex << std::endl;
 //		}
-//		
+//
 //	}
 //
 //	glm::dmat4 getProjEye(vr::Hmd_Eye eye){
@@ -184,8 +184,8 @@
 //
 //			return glm::dmat4(
 //				mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
-//				mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1], 
-//				mat.m[0][2], mat.m[1][2], mat.m[2][2], mat.m[3][2], 
+//				mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1],
+//				mat.m[0][2], mat.m[1][2], mat.m[2][2], mat.m[3][2],
 //				mat.m[0][3], mat.m[1][3], mat.m[2][3], mat.m[3][3]
 //			);
 //		}
@@ -198,7 +198,7 @@
 //			auto pose = vrSystem->GetEyeToHeadTransform(eye);
 //
 //			glm::dmat4 matrixObj(
-//				pose.m[0][0], pose.m[1][0], pose.m[2][0], 0.0, 
+//				pose.m[0][0], pose.m[1][0], pose.m[2][0], 0.0,
 //				pose.m[0][1], pose.m[1][1], pose.m[2][1], 0.0,
 //				pose.m[0][2], pose.m[1][2], pose.m[2][2], 0.0,
 //				pose.m[0][3], pose.m[1][3], pose.m[2][3], 1.0f
@@ -208,16 +208,15 @@
 //		}
 //	}
 //
-//	string GetTrackedDeviceString(vr::TrackedDeviceIndex_t unDevice, vr::TrackedDeviceProperty prop, vr::TrackedPropertyError *peError = nullptr ){
-//		uint32_t unRequiredBufferLen = vr::VRSystem()->GetStringTrackedDeviceProperty( unDevice, prop, nullptr, 0, peError );
-//		if( unRequiredBufferLen == 0 ){
+//	string GetTrackedDeviceString(vr::TrackedDeviceIndex_t unDevice, vr::TrackedDeviceProperty prop,
+//vr::TrackedPropertyError *peError = nullptr ){ 		uint32_t unRequiredBufferLen =
+//vr::VRSystem()->GetStringTrackedDeviceProperty( unDevice, prop, nullptr, 0, peError ); 		if( unRequiredBufferLen == 0 ){
 //			return "";
 //		}
 //
 //		char *pchBuffer = new char[ unRequiredBufferLen ];
-//		unRequiredBufferLen = vr::VRSystem()->GetStringTrackedDeviceProperty( unDevice, prop, pchBuffer, unRequiredBufferLen, peError );
-//		std::string sResult = pchBuffer;
-//		delete [] pchBuffer;
+//		unRequiredBufferLen = vr::VRSystem()->GetStringTrackedDeviceProperty( unDevice, prop, pchBuffer,
+//unRequiredBufferLen, peError ); 		std::string sResult = pchBuffer; 		delete [] pchBuffer;
 //
 //		return sResult;
 //	}

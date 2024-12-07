@@ -3,152 +3,169 @@
 
 #include "unsuck.hpp"
 
-void GLTimerQueries::timestamp(string label) {
-	GLTimerQueries* glt = GLTimerQueries::instance();
+void GLTimerQueries::timestamp(string label)
+{
+    GLTimerQueries *glt = GLTimerQueries::instance();
 
-	if (!glt->enabled) {
-		return;
-	}
+    if (!glt->enabled)
+    {
+        return;
+    }
 
-	GLuint handle;
-	glGenQueries(1, &handle);
-	glQueryCounter(handle, GL_TIMESTAMP);
+    GLuint handle;
+    glGenQueries(1, &handle);
+    glQueryCounter(handle, GL_TIMESTAMP);
 
-	GLTimestamp timestamp;
-	timestamp.label = label;
-	timestamp.handle = handle;
+    GLTimestamp timestamp;
+    timestamp.label = label;
+    timestamp.handle = handle;
 
-	glt->currentFrame.timestamps.push_back(timestamp);
+    glt->currentFrame.timestamps.push_back(timestamp);
 }
 
-void GLTimerQueries::timestampPrint(string label) {
-	GLTimerQueries* glt = GLTimerQueries::instance();
+void GLTimerQueries::timestampPrint(string label)
+{
+    GLTimerQueries *glt = GLTimerQueries::instance();
 
-	if (!glt->enabled) {
-		return;
-	}
+    if (!glt->enabled)
+    {
+        return;
+    }
 
-	GLuint handle;
-	glGenQueries(1, &handle);
-	glQueryCounter(handle, GL_TIMESTAMP);
+    GLuint handle;
+    glGenQueries(1, &handle);
+    glQueryCounter(handle, GL_TIMESTAMP);
 
-	GLTimestamp timestamp;
-	timestamp.label = label;
-	timestamp.handle = handle;
-	timestamp.shouldPrint = true;
+    GLTimestamp timestamp;
+    timestamp.label = label;
+    timestamp.handle = handle;
+    timestamp.shouldPrint = true;
 
-	glt->currentFrame.timestamps.push_back(timestamp);
+    glt->currentFrame.timestamps.push_back(timestamp);
 }
 
-void GLTimerQueries::frameStart() {
-	GLTimerQueries* glt = GLTimerQueries::instance();
+void GLTimerQueries::frameStart()
+{
+    GLTimerQueries *glt = GLTimerQueries::instance();
 
-	if (!glt->enabled) {
-		return;
-	}
+    if (!glt->enabled)
+    {
+        return;
+    }
 
-	GLTimerQueries::instance()->currentFrame = GLFrame();
+    GLTimerQueries::instance()->currentFrame = GLFrame();
 
-	GLTimerQueries::timestamp("frame-start");
+    GLTimerQueries::timestamp("frame-start");
 }
 
-void GLTimerQueries::frameEnd() {
-	GLTimerQueries* glt = GLTimerQueries::instance();
+void GLTimerQueries::frameEnd()
+{
+    GLTimerQueries *glt = GLTimerQueries::instance();
 
-	if (!glt->enabled) {
-		return;
-	}
+    if (!glt->enabled)
+    {
+        return;
+    }
 
-	GLTimerQueries::timestamp("frame-end");
+    GLTimerQueries::timestamp("frame-end");
 
-	glt->frames.push(glt->currentFrame);
-	glt->currentFrame = GLFrame();
+    glt->frames.push(glt->currentFrame);
+    glt->currentFrame = GLFrame();
 
-	if (glt->frames.size() > 3) {
-		auto frame = glt->frames.front();
-		glt->frames.pop();
+    if (glt->frames.size() > 3)
+    {
+        auto frame = glt->frames.front();
+        glt->frames.pop();
 
-		auto& stats = glt->stats_buildup;
+        auto &stats = glt->stats_buildup;
 
-		vector<Timestamp> timings;
+        vector<Timestamp> timings;
 
-		for (auto& timestamp : frame.timestamps) {
-			uint64_t result = 123;
-			glGetQueryObjectui64v(timestamp.handle, GL_QUERY_RESULT_AVAILABLE, &result);
-			bool timestampAvailable = result == GL_TRUE;
+        for (auto &timestamp : frame.timestamps)
+        {
+            uint64_t result = 123;
+            glGetQueryObjectui64v(timestamp.handle, GL_QUERY_RESULT_AVAILABLE, &result);
+            bool timestampAvailable = result == GL_TRUE;
 
-			if (timestampAvailable) {
-				uint64_t nanos = 123;
-				glGetQueryObjectui64v(timestamp.handle, GL_QUERY_RESULT, &nanos);
+            if (timestampAvailable)
+            {
+                uint64_t nanos = 123;
+                glGetQueryObjectui64v(timestamp.handle, GL_QUERY_RESULT, &nanos);
 
-				Timestamp item;
-				item.label = timestamp.label;
-				item.nanos = nanos;
-				item.shouldPrint = timestamp.shouldPrint;
-				timings.push_back(item);
+                Timestamp item;
+                item.label = timestamp.label;
+                item.nanos = nanos;
+                item.shouldPrint = timestamp.shouldPrint;
+                timings.push_back(item);
+            }
+            else
+            {
+                cout << "could not resolve timestamp " << endl;
+            }
 
-			} else {
-				cout << "could not resolve timestamp " << endl;
-			}
+            glDeleteQueries(1, &timestamp.handle);
+        }
 
-			glDeleteQueries(1, &timestamp.handle);
-		}
+        auto startTime = timings[0].nanos;
+        unordered_map<string, Timestamp> starts;
+        vector<Duration> durations;
 
-		auto startTime = timings[0].nanos;
-		unordered_map<string, Timestamp> starts;
-		vector<Duration> durations;
+        for (auto &timestamp : timings)
+        {
+            timestamp.nanos = timestamp.nanos - startTime;
 
-		for (auto& timestamp : timings) {
-			timestamp.nanos = timestamp.nanos - startTime;
+            if (endsWith(timestamp.label, "-start"))
+            {
+                starts[timestamp.label] = timestamp;
+                //
+            }
+            else if (endsWith(timestamp.label, "-end"))
+            {
+                string baseLabel = timestamp.label.substr(0, timestamp.label.size() - 4);
+                string startLabel = baseLabel + "-start";
+                auto start = starts[startLabel];
 
-			if (endsWith(timestamp.label, "-start")) {
-				starts[timestamp.label] = timestamp;
-				//
-			} else if (endsWith(timestamp.label, "-end")) {
-				string baseLabel = timestamp.label.substr(0, timestamp.label.size() - 4);
-				string startLabel = baseLabel + "-start";
-				auto start = starts[startLabel];
+                auto duration = timestamp.nanos - start.nanos;
 
-				auto duration = timestamp.nanos - start.nanos;
+                double millies = double(duration) / 1'000'000;
 
-				double millies = double(duration) / 1'000'000;
+                if (stats.find(baseLabel) == stats.end())
+                {
+                    stats[baseLabel] = GLTStats();
+                }
 
-				if (stats.find(baseLabel) == stats.end()) {
-					stats[baseLabel] = GLTStats();
-				}
+                auto &stat = stats[baseLabel];
 
-				auto& stat = stats[baseLabel];
+                stat.min = std::min(stat.min, millies);
+                stat.max = std::max(stat.max, millies);
+                stat.sum += millies;
+                stat.count++;
 
-				stat.min = std::min(stat.min, millies);
-				stat.max = std::max(stat.max, millies);
-				stat.sum += millies;
-				stat.count++;
+                Duration item;
+                item.label = baseLabel;
+                item.nanos = duration;
 
-				Duration item;
-				item.label = baseLabel;
-				item.nanos = duration;
+                if (timestamp.shouldPrint)
+                {
+                    double avg = stat.sum / stat.count;
+                    cout << "load batch: " << formatNumber(avg, 3) << "ms " << endl;
+                }
 
-				if(timestamp.shouldPrint){
-					double avg = stat.sum / stat.count;
-					cout << "load batch: " << formatNumber(avg, 3) << "ms " << endl;
-				}
+                durations.push_back(item);
+            }
+        }
 
-				durations.push_back(item);
-			}
-		}
+        // Update once per <window>. TODO: compute mean, update that once per second.
+        double window = 0.1;
+        static double toggle = now();
+        if (now() - toggle > window)
+        {
+            glt->timings = timings;
+            glt->durations = durations;
+            toggle = now();
 
-
-		// Update once per <window>. TODO: compute mean, update that once per second.
-		double window = 0.1;
-		static double toggle = now();
-		if (now() - toggle > window) {
-			glt->timings = timings;
-			glt->durations = durations;
-			toggle = now();
-
-			glt->stats = glt->stats_buildup;
-			glt->stats_buildup = unordered_map<string, GLTStats>();
-		}
-
-	}
+            glt->stats = glt->stats_buildup;
+            glt->stats_buildup = unordered_map<string, GLTStats>();
+        }
+    }
 }

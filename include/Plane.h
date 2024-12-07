@@ -7,46 +7,49 @@
 
 using namespace std;
 using glm::dmat4;
-using glm::mat4;
 using glm::dvec3;
 using glm::dvec4;
+using glm::mat4;
 
-class Plane{
+class Plane
+{
 
-public:
+  public:
+    dvec3 normal = {0.0, 0.0, 0.0};
+    double constant = 0.0;
 
-	dvec3 normal = {0.0, 0.0, 0.0};
-	double constant = 0.0;
+    Plane()
+    {
+    }
 
-	Plane(){
-	
-	}
+    Plane(dvec3 normal, double constant)
+    {
+        this->normal = normal;
+        this->constant = constant;
+    }
 
-	Plane(dvec3 normal, double constant){
-		this->normal = normal;
-		this->constant = constant;
-	}
+    Plane *set(double x, double y, double z, double constant)
+    {
+        this->normal = {x, y, z};
+        this->constant = constant;
 
-	Plane* set(double x, double y, double z, double constant){
-		this->normal = {x, y, z};
-		this->constant = constant;
+        return this;
+    }
 
-		return this;
-	}
+    double distanceTo(dvec3 point)
+    {
+        double distance = glm::dot(normal, point) + constant;
 
-	double distanceTo(dvec3 point){
-		double distance = glm::dot(normal, point) + constant;
+        return distance;
+    }
 
-		return distance;
-	}
+    Plane *normalize()
+    {
+        double length = glm::length(normal);
 
-	Plane* normalize(){
-		double length = glm::length(normal);
+        normal = normal / length;
+        constant = constant / length;
 
-		normal = normal / length;
-		constant = constant / length;
-
-		return this;
-	}
-
+        return this;
+    }
 };
