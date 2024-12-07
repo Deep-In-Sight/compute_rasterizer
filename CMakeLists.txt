@@ -84,5 +84,3 @@ target_link_libraries(ComputeRasterizerPerf ${LIBRARIES})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/modules
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
