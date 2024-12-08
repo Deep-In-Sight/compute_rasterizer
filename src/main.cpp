@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <iostream>
 
-#include "compute/LasLoaderSparse.h"
+#include "LasLoaderSparse.h"
 #include "compute_loop_las/compute_loop_las.h"
 
 using namespace std;
@@ -35,7 +35,7 @@ int main()
     renderer->controls->radius = 2310.47;
     renderer->controls->target = {576.91, 886.62, 10.35};
 
-    auto lasLoaderSparse = make_shared<LasLoaderSparse>(renderer);
+    auto lasLoaderSparse = make_shared<LasLoaderSparse>();
 
     Runtime::lasLoaderSparse = lasLoaderSparse;
 

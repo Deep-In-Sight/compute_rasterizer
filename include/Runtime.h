@@ -8,9 +8,8 @@
 #include "glm/common.hpp"
 
 #include "Method.h"
-#include "compute/Resources.h"
 
-#include "compute/LasLoaderSparse.h"
+#include "LasLoaderSparse.h"
 
 using namespace std;
 
@@ -19,7 +18,6 @@ struct Runtime
 
     inline static vector<Method *> methods;
     inline static Method *selectedMethod = nullptr;
-    inline static Resource *resource = nullptr;
     inline static vector<int> keyStates = vector<int>(65536, 0);
     inline static glm::dvec2 mousePosition = {0.0, 0.0};
     inline static int mouseButtons = 0;

@@ -9,7 +9,6 @@
 
 #include "glm/common.hpp"
 #include "glm/matrix.hpp"
-#include "nlohmann/json.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -21,16 +20,15 @@
 #include "Debug.h"
 #include "Frustum.h"
 #include "GLTimerQueries.h"
+#include "LasLoaderSparse.h"
 #include "Method.h"
 #include "Renderer.h"
 #include "Shader.h"
-#include "compute/LasLoaderSparse.h"
 #include <Framebuffer.h>
 #include <Texture.h>
 
 using namespace std;
 using namespace std::chrono_literals;
-using nlohmann::json;
 
 using glm::ivec2;
 

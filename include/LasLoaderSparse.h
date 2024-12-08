@@ -4,13 +4,11 @@
 #include <filesystem>
 #include <string>
 
-#include "Resources.h"
 #include "Shader.h"
 #include "TaskPool.h"
 #include "glm/common.hpp"
 #include "glm/matrix.hpp"
 #include "glm/vec3.hpp"
-#include "laszip_api.h"
 #include "unsuck.hpp"
 #include <GLBuffer.h>
 #include <glm/gtx/transform.hpp>
@@ -20,6 +18,12 @@ using glm::dvec3;
 using glm::vec3;
 
 namespace fs = std::filesystem;
+
+#define POINTS_PER_THREAD 80
+#define WORKGROUP_SIZE 128
+#define POINTS_PER_WORKGROUP (POINTS_PER_THREAD * WORKGROUP_SIZE)
+// Adjust this to be something in the order of 1 million points
+#define MAX_POINTS_PER_BATCH (100 * POINTS_PER_WORKGROUP)
 
 struct LasFile
 {
@@ -86,8 +90,6 @@ struct LasLoaderSparse
     int64_t bytesReserved = 0;
     int64_t numFiles = 0;
 
-    Renderer *renderer = nullptr;
-
     GLBuffer ssBatches;
     GLBuffer ssXyzLow;
     GLBuffer ssXyzMed;
@@ -95,7 +97,7 @@ struct LasLoaderSparse
     GLBuffer ssColors;
     GLBuffer ssLoadBuffer;
 
-    LasLoaderSparse(Renderer *renderer);
+    LasLoaderSparse();
 
     void add(vector<string> files, std::function<void(vector<shared_ptr<LasFile>>)> callback);
 

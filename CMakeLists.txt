@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # includes the bundled libs
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip)
 set(GLM_STATIC_LIBRARY_ENABLE ON)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm)
 
@@ -35,9 +34,8 @@ set(MAIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OrbitControls.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/unsuck_platform_specific.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/compute/ComputeLasLoader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/compute/LasLoaderSparse.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/unsuck_platform_specific.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
 
 set(LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/glew/glew.c
@@ -58,16 +56,14 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/modules
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/glew/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/backends
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/json
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip
     ${GLFW3_INCLUDE_DIRS}
     ${CUDA_INCLUDE_DIRS})
 
-set(LIBRARIES laszip glfw OpenGL::GL cuda ${CUDA_LIBRARIES})
+set(LIBRARIES glfw OpenGL::GL cuda ${CUDA_LIBRARIES})
 
 # Add the executable
 add_executable(ComputeRasterizerMain ${SOURCES}
