@@ -145,8 +145,8 @@ struct ComputeLoopLas : public Method
         // Update Uniform Buffer
         {
             mat4 world;
-            mat4 view = renderer->views[0].view;
-            mat4 proj = renderer->views[0].proj;
+            mat4 view = renderer->camera->view;
+            mat4 proj = renderer->camera->proj;
             mat4 worldView = view * world;
             mat4 worldViewProj = proj * view * world;
 
@@ -176,8 +176,8 @@ struct ComputeLoopLas : public Method
                 auto lasfile = las->files[i];
 
                 dmat4 world = glm::translate(dmat4(), lasfile->boxMin);
-                dmat4 view = renderer->views[0].view;
-                dmat4 proj = renderer->views[0].proj;
+                dmat4 view = renderer->camera->view;
+                dmat4 proj = renderer->camera->proj;
                 dmat4 worldView = view * world;
                 dmat4 worldViewProj = proj * view * world;
 

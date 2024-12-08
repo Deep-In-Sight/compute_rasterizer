@@ -3,7 +3,6 @@
 #include "Renderer.h"
 #include "Runtime.h"
 #include <OrbitControls.h>
-#include <cuda.h>
 #include <iostream>
 
 #include "LasLoaderSparse.h"
@@ -19,16 +18,6 @@ int main()
     cout << std::setprecision(2) << std::fixed;
 
     auto renderer = Renderer::Instance();
-    // renderer->init();
-
-    // Creating a CUDA context
-    cuInit(0);
-    CUdevice cuDevice;
-    CUcontext context;
-    cuDeviceGet(&cuDevice, 0);
-    cuCtxCreate(&context, 0, cuDevice);
-
-    auto tStart = now();
 
     renderer->controls->yaw = 0.53;
     renderer->controls->pitch = -0.68;
@@ -92,12 +81,6 @@ int main()
 
     auto render = [&]() {
         {
-
-            auto &view = renderer->views[0];
-
-            view.view = renderer->camera->view;
-            view.proj = renderer->camera->proj;
-
             renderer->views[0].framebuffer->setSize(renderer->width, renderer->height);
         }
 

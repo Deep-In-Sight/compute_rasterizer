@@ -19,13 +19,6 @@ if(POLICY CMP0072)
 endif()
 find_package(OpenGL REQUIRED)
 
-# cuda
-if(NOT DEFINED CUDA_TOOLKIT_ROOT_DIR)
-  set(CUDA_TOOLKIT_ROOT_DIR /usr/local/cuda) # Adjust this path to your CUDA
-                                             # installation
-endif()
-find_package(CUDA REQUIRED)
-
 # Add all cpp files under CMAKE_CURRENT_SOURCE_DIR/src to the SOURCES variable
 set(MAIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Framebuffer.cpp
@@ -35,6 +28,7 @@ set(MAIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/unsuck_platform_specific.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiOverlay.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
 
 set(LIB_SRCS
@@ -60,10 +54,9 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/backends
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip
-    ${GLFW3_INCLUDE_DIRS}
-    ${CUDA_INCLUDE_DIRS})
+    ${GLFW3_INCLUDE_DIRS})
 
-set(LIBRARIES glfw OpenGL::GL cuda ${CUDA_LIBRARIES})
+set(LIBRARIES glfw OpenGL::GL pthread)
 
 # Add the executable
 add_executable(ComputeRasterizerMain ${SOURCES}
