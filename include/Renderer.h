@@ -8,7 +8,6 @@
 
 #include "glm/matrix.hpp"
 
-struct GLFWwindow;
 struct Camera;
 struct OrbitControls;
 struct Framebuffer;
@@ -22,7 +21,6 @@ struct View
 
 struct Renderer
 {
-    GLFWwindow *window = nullptr;
 
     std::shared_ptr<Camera> camera = nullptr;
     std::shared_ptr<OrbitControls> controls = nullptr;
@@ -37,9 +35,8 @@ struct Renderer
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;
 
-    void init();
-
-    void loop(std::function<void(void)> update, std::function<void(void)> render);
+    void renderOneFrame(std::function<void(void)> update, std::function<void(void)> render);
+    void setSize(int width, int height);
 
     void addFileDropCallback(std::function<void(std::vector<std::string>)> callback);
 
