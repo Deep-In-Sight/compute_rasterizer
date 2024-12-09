@@ -40,8 +40,10 @@ struct Renderer
     Renderer &operator=(const Renderer &) = delete;
 
     void renderOneFrame();
+    void setTargetFbo(unsigned int fboId);
     void setSize(int width, int height);
 
   private:
     Renderer();
+    unsigned int targetFboId = 0;
 };

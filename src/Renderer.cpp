@@ -36,6 +36,11 @@ void Renderer::setSize(int width, int height)
     views[0].framebuffer->setSize(width, height);
 }
 
+void Renderer::setTargetFbo(unsigned int fboId)
+{
+    targetFboId = fboId;
+}
+
 void Renderer::renderOneFrame()
 {
     GLTimerQueries::frameStart();
@@ -60,8 +65,8 @@ void Renderer::renderOneFrame()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, this->width, this->height);
         auto source = views[0].framebuffer;
-        glBlitNamedFramebuffer(source->handle, 0, 0, 0, source->width, source->height, 0, 0, 0 + source->width,
-                               0 + source->height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        glBlitNamedFramebuffer(source->handle, targetFboId, 0, 0, source->width, source->height, 0, 0,
+                               0 + source->width, 0 + source->height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
 
     // FINISH FRAME

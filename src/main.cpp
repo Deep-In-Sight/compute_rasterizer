@@ -188,6 +188,7 @@ int main()
     }
 
     ImGuiInit(window);
+    renderer->setTargetFbo(0); // on screen
 
     while (!glfwWindowShouldClose(window))
     {
