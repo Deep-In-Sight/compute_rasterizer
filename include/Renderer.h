@@ -35,7 +35,7 @@ struct Renderer
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;
 
-    void renderOneFrame(std::function<void(void)> update, std::function<void(void)> render);
+    void renderOneFrame();
     void setSize(int width, int height);
 
     void addFileDropCallback(std::function<void(std::vector<std::string>)> callback);

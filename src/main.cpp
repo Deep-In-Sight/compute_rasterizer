@@ -221,31 +221,11 @@ int main()
         Runtime::setSelectedMethod("loop_las");
     }
 
-    auto update = [&]() {
-        lasLoaderSparse->process();
-
-        auto selected = Runtime::getSelectedMethod();
-        if (selected)
-        {
-            selected->update(renderer);
-        }
-    };
-
-    auto render = [&]() {
-        {
-            auto selected = Runtime::getSelectedMethod();
-            if (selected)
-            {
-                selected->render(renderer);
-            }
-        }
-    };
-
     ImGuiInit(window);
 
     while (!glfwWindowShouldClose(window))
     {
-        renderer->renderOneFrame(update, render);
+        renderer->renderOneFrame();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

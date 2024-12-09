@@ -10,8 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(GLM_STATIC_LIBRARY_ENABLE ON)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm)
 
-# libs/glfw is prebuilt for windows only, so use system installed glfw
 find_package(glfw3 REQUIRED)
+find_package(GLEW REQUIRED)
 
 # opengl
 if(POLICY CMP0072)
@@ -20,7 +20,7 @@ endif()
 find_package(OpenGL REQUIRED)
 
 # Add all cpp files under CMAKE_CURRENT_SOURCE_DIR/src to the SOURCES variable
-set(MAIN_SRCS
+set(COMPUTE_RASTERIZER_LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Framebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLTimerQueries.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLBuffer.cpp
@@ -28,11 +28,13 @@ set(MAIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/unsuck_platform_specific.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiOverlay.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
 
-set(LIB_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/glew/glew.c
+set(COMPUTE_RASTERIZER_LIB_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm ${GLEW_INCLUDE_DIRS})
+
+set(EXTRA_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/imgui_draw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/imgui_tables.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/imgui_widgets.cpp
@@ -43,33 +45,30 @@ set(LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot/implot.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot/implot_items.cpp)
 
-set(SOURCES ${MAIN_SRCS} ${LIB_SRCS})
-
-set(INCLUDE_DIRS
+set(EXTRA_INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/glew/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/backends
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/implot
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/laszip
-    ${GLFW3_INCLUDE_DIRS})
+    ${GLFW3_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS})
 
-set(LIBRARIES glfw OpenGL::GL pthread)
+set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread)
+
+add_library(ComputeRasterizerLib STATIC ${COMPUTE_RASTERIZER_LIB_SRCS})
+target_include_directories(ComputeRasterizerLib
+                           PUBLIC ${COMPUTE_RASTERIZER_LIB_INCLUDES})
+target_link_libraries(ComputeRasterizerLib PUBLIC ${LIBRARIES})
 
 # Add the executable
-add_executable(ComputeRasterizerMain ${SOURCES}
-                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+add_executable(
+  ComputeRasterizerMain ${EXTRA_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+                        ${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiOverlay.cpp)
 # Include directories
-target_include_directories(ComputeRasterizerMain PUBLIC ${INCLUDE_DIRS})
+target_include_directories(ComputeRasterizerMain PUBLIC ${EXTRA_INCLUDES})
 # Link the libraries
-target_link_libraries(ComputeRasterizerMain ${LIBRARIES})
-
-add_executable(ComputeRasterizerPerf
-               ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/main_buildup_perf.cpp)
-target_include_directories(ComputeRasterizerPerf PUBLIC ${INCLUDE_DIRS})
-target_link_libraries(ComputeRasterizerPerf ${LIBRARIES})
+target_link_libraries(ComputeRasterizerMain ComputeRasterizerLib)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/modules
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

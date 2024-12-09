@@ -37,7 +37,7 @@ void Renderer::setSize(int width, int height)
     views[0].framebuffer->setSize(width, height);
 }
 
-void Renderer::renderOneFrame(function<void(void)> update, function<void(void)> render)
+void Renderer::renderOneFrame()
 {
     GLTimerQueries::frameStart();
     Debug::clearFrameStats();
@@ -49,8 +49,12 @@ void Renderer::renderOneFrame(function<void(void)> update, function<void(void)> 
     }
 
     { // UPDATE & RENDER
-        update();
-        render();
+        auto selected = Runtime::getSelectedMethod();
+        if (selected)
+        {
+            selected->update(this);
+            selected->render(this);
+        }
     }
 
     {
