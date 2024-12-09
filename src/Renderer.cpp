@@ -62,9 +62,11 @@ void Renderer::renderOneFrame()
     }
 
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, this->width, this->height);
+        // glBindFramebuffer(GL_FRAMEBUFFER, targetFboId);
+        // glViewport(0, 0, this->width, this->height);
         auto source = views[0].framebuffer;
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, source->handle);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFboId);
         glBlitNamedFramebuffer(source->handle, targetFboId, 0, 0, source->width, source->height, 0, 0,
                                0 + source->width, 0 + source->height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
