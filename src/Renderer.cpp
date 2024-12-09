@@ -70,8 +70,3 @@ void Renderer::renderOneFrame()
     // FINISH FRAME
     GLTimerQueries::frameEnd();
 }
-
-void Renderer::addFileDropCallback(std::function<void(std::vector<std::string>)> callback)
-{
-    fileDropListeners.push_back(callback);
-}

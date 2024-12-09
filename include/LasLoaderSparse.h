@@ -13,10 +13,6 @@
 #include <GLBuffer.h>
 #include <glm/gtx/transform.hpp>
 
-using namespace std;
-using glm::dvec3;
-using glm::vec3;
-
 namespace fs = std::filesystem;
 
 #define POINTS_PER_THREAD 80
@@ -28,16 +24,16 @@ namespace fs = std::filesystem;
 struct LasFile
 {
     int64_t fileIndex = 0;
-    string path;
+    std::string path;
     int64_t numPoints = 0;
     int64_t numPointsLoaded = 0;
     uint32_t offsetToPointData = 0;
     int pointFormat = 0;
     uint32_t bytesPerPoint = 0;
-    dvec3 scale = {1.0, 1.0, 1.0};
-    dvec3 offset = {0.0, 0.0, 0.0};
-    dvec3 boxMin;
-    dvec3 boxMax;
+    glm::dvec3 scale = {1.0, 1.0, 1.0};
+    glm::dvec3 offset = {0.0, 0.0, 0.0};
+    glm::dvec3 boxMin;
+    glm::dvec3 boxMax;
 
     int64_t numBatches = 0;
 
@@ -55,33 +51,33 @@ struct LasLoaderSparse
     int64_t MAX_POINTS = 1'000'000'000;
     int64_t PAGE_SIZE = 0;
 
-    mutex mtx_upload;
-    mutex mtx_load;
+    std::mutex mtx_upload;
+    std::mutex mtx_load;
 
     struct LoadTask
     {
-        shared_ptr<LasFile> lasfile;
+        std::shared_ptr<LasFile> lasfile;
         int64_t firstPoint;
         int64_t numPoints;
     };
 
     struct UploadTask
     {
-        shared_ptr<LasFile> lasfile;
+        std::shared_ptr<LasFile> lasfile;
         int64_t sparse_pointOffset;
         int64_t sparse_batchOffset;
         int64_t numPoints;
         int64_t numBatches;
-        shared_ptr<Buffer> bXyzLow;
-        shared_ptr<Buffer> bXyzMed;
-        shared_ptr<Buffer> bXyzHig;
-        shared_ptr<Buffer> bColors;
-        shared_ptr<Buffer> bBatches;
+        std::shared_ptr<Buffer> bXyzLow;
+        std::shared_ptr<Buffer> bXyzMed;
+        std::shared_ptr<Buffer> bXyzHig;
+        std::shared_ptr<Buffer> bColors;
+        std::shared_ptr<Buffer> bBatches;
     };
 
-    vector<shared_ptr<LasFile>> files;
-    vector<LoadTask> loadTasks;
-    vector<UploadTask> uploadTasks;
+    std::vector<std::shared_ptr<LasFile>> files;
+    std::vector<LoadTask> loadTasks;
+    std::vector<UploadTask> uploadTasks;
 
     int64_t numPoints = 0;
     int64_t numPointsLoaded = 0;
@@ -99,9 +95,12 @@ struct LasLoaderSparse
 
     LasLoaderSparse();
 
-    void add(vector<string> files, std::function<void(vector<shared_ptr<LasFile>>)> callback);
+    void add(std::vector<std::string> files);
 
     void spawnLoader();
 
     void process();
+
+  private:
+    void centerScene(std::vector<std::shared_ptr<LasFile>> &lasFiles);
 };

@@ -1,6 +1,8 @@
 
 #include "LasLoaderSparse.h"
 #include "unsuck.hpp"
+#include <OrbitControls.h>
+#include <Renderer.h>
 
 #define STEPS_30BIT 1073741824
 #define MASK_30BIT 1073741823
@@ -10,6 +12,8 @@
 #define MASK_10BIT 1023
 
 mutex mtx_debug;
+using namespace std;
+using namespace glm;
 
 struct LoadResult
 {
@@ -160,9 +164,9 @@ shared_ptr<LoadResult> loadLas(shared_ptr<LasFile> lasfile, int64_t firstPoint, 
             uint32_t Y30 = uint32_t(((y - batch.min.y) / batchBoxSize.y) * STEPS_30BIT);
             uint32_t Z30 = uint32_t(((z - batch.min.z) / batchBoxSize.z) * STEPS_30BIT);
 
-            X30 = min(X30, uint32_t(STEPS_30BIT - 1));
-            Y30 = min(Y30, uint32_t(STEPS_30BIT - 1));
-            Z30 = min(Z30, uint32_t(STEPS_30BIT - 1));
+            X30 = std::min(X30, uint32_t(STEPS_30BIT - 1));
+            Y30 = std::min(Y30, uint32_t(STEPS_30BIT - 1));
+            Z30 = std::min(Z30, uint32_t(STEPS_30BIT - 1));
 
             { // low
                 uint32_t X_low = (X30 >> 20) & MASK_10BIT;
@@ -276,7 +280,29 @@ LasLoaderSparse::LasLoaderSparse()
     // spawnLoader();
 }
 
-void LasLoaderSparse::add(vector<string> files, std::function<void(vector<shared_ptr<LasFile>>)> callback)
+void LasLoaderSparse::centerScene(std::vector<std::shared_ptr<LasFile>> &lasFiles)
+{
+    dvec3 boxMin = {Infinity, Infinity, Infinity};
+    dvec3 boxMax = {-Infinity, -Infinity, -Infinity};
+
+    for (auto lasfile : lasFiles)
+    {
+        boxMin = glm::min(boxMin, lasfile->boxMin);
+        boxMax = glm::max(boxMax, lasfile->boxMax);
+    }
+
+    // zoom to point cloud
+    auto size = boxMax - boxMin;
+    auto position = (boxMax + boxMin) / 2.0;
+    auto radius = glm::length(size) / 1.5;
+
+    Renderer::Instance()->controls->yaw = 0.53;
+    Renderer::Instance()->controls->pitch = -0.68;
+    Renderer::Instance()->controls->radius = radius;
+    Renderer::Instance()->controls->target = position;
+}
+
+void LasLoaderSparse::add(vector<string> files)
 {
 
     vector<shared_ptr<LasFile>> lasfiles;
@@ -309,7 +335,7 @@ void LasLoaderSparse::add(vector<string> files, std::function<void(vector<shared
             lasfile->numPoints = buffer_header->get<uint64_t>(247);
         }
 
-        lasfile->numPoints = min(lasfile->numPoints, (int64_t)1'000'000'000ll);
+        lasfile->numPoints = std::min(lasfile->numPoints, (int64_t)1'000'000'000ll);
 
         lasfile->offsetToPointData = buffer_header->get<uint32_t>(96);
         lasfile->pointFormat = buffer_header->get<uint8_t>(104) % 128;
@@ -363,7 +389,7 @@ void LasLoaderSparse::add(vector<string> files, std::function<void(vector<shared
             {
 
                 int64_t remaining = lasfile->numPoints - pointOffset;
-                int64_t pointsInBatch = min(int64_t(MAX_POINTS_PER_BATCH), remaining);
+                int64_t pointsInBatch = std::min(int64_t(MAX_POINTS_PER_BATCH), remaining);
 
                 LoadTask task;
                 task.lasfile = lasfile;
@@ -395,7 +421,7 @@ void LasLoaderSparse::add(vector<string> files, std::function<void(vector<shared
     pool.close();
     pool.waitTillEmpty();
 
-    callback(lasfiles);
+    centerScene(lasfiles);
 }
 
 void LasLoaderSparse::spawnLoader()
