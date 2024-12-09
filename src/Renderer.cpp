@@ -6,7 +6,6 @@
 #include <Camera.h>
 #include <Debug.h>
 #include <Framebuffer.h>
-#include <ImGuiOverlay.h>
 #include <OrbitControls.h>
 #include <filesystem>
 
@@ -64,8 +63,6 @@ void Renderer::renderOneFrame()
         glBlitNamedFramebuffer(source->handle, 0, 0, 0, source->width, source->height, 0, 0, 0 + source->width,
                                0 + source->height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
-
-    ImGuiUpdate();
 
     // FINISH FRAME
     GLTimerQueries::frameEnd();

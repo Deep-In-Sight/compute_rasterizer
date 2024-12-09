@@ -192,6 +192,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         renderer->renderOneFrame();
+        ImGuiUpdate();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
