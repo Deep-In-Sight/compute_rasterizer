@@ -185,10 +185,11 @@ void main(){
 			G = uint(float(G) * shade);
 			B = uint(float(B) * shade);
 
-			color = R | (G << 8) | (B << 16);
+			color = R | (G << 8) | (B << 16) | (0xFF << 24);
 
 			// color = uint(255.0 * shade);
 		}
+		color |= 0xFF000000;
 
 		imageAtomicExchange(uOutput, pixelCoords, color);
 	}

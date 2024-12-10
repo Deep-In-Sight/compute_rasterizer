@@ -133,12 +133,14 @@ int main()
 
     int numMonitors;
     GLFWmonitor **monitors = glfwGetMonitors(&numMonitors);
+    int windowWidth = 800, windowHeight = 600;
 
     cout << "<create windows>" << endl;
     {
         const GLFWvidmode *mode = glfwGetVideoMode(monitors[0]);
 
-        window = glfwCreateWindow(mode->width - 100, mode->height - 100, "Simple example", nullptr, nullptr);
+        // window = glfwCreateWindow(mode->width - 100, mode->height - 100, "Simple example", nullptr, nullptr);
+        window = glfwCreateWindow(windowWidth, windowHeight, "Simple example", nullptr, nullptr);
 
         if (!window)
         {
@@ -189,6 +191,7 @@ int main()
 
     ImGuiInit(window);
     renderer->setTargetFbo(0); // on screen
+    renderer->setSize(windowWidth, windowHeight);
 
     while (!glfwWindowShouldClose(window))
     {

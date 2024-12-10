@@ -10,4 +10,5 @@ struct Texture
 
     static std::shared_ptr<Texture> create(int width, int height, unsigned int colorType);
     void setSize(int width, int height);
+    void saveToFile(const std::string &filename);
 };
