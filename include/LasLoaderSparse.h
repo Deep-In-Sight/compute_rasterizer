@@ -101,6 +101,6 @@ struct LasLoaderSparse
 
     void process();
 
-  private:
-    void centerScene(std::vector<std::shared_ptr<LasFile>> &lasFiles);
+    glm::dvec3 boxCenter = {0.0, 0.0, 0.0};
+    glm::dvec3 boxSize = {0.0, 0.0, 0.0};
 };

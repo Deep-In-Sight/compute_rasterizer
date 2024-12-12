@@ -280,28 +280,6 @@ LasLoaderSparse::LasLoaderSparse()
     // spawnLoader();
 }
 
-void LasLoaderSparse::centerScene(std::vector<std::shared_ptr<LasFile>> &lasFiles)
-{
-    dvec3 boxMin = {Infinity, Infinity, Infinity};
-    dvec3 boxMax = {-Infinity, -Infinity, -Infinity};
-
-    for (auto lasfile : lasFiles)
-    {
-        boxMin = glm::min(boxMin, lasfile->boxMin);
-        boxMax = glm::max(boxMax, lasfile->boxMax);
-    }
-
-    // zoom to point cloud
-    auto size = boxMax - boxMin;
-    auto position = (boxMax + boxMin) / 2.0;
-    auto radius = glm::length(size) / 1.5;
-
-    Renderer::Instance()->controls->yaw = 0.53;
-    Renderer::Instance()->controls->pitch = -0.68;
-    Renderer::Instance()->controls->radius = radius;
-    Renderer::Instance()->controls->target = position;
-}
-
 void LasLoaderSparse::add(vector<string> files)
 {
 
@@ -421,7 +399,18 @@ void LasLoaderSparse::add(vector<string> files)
     pool.close();
     pool.waitTillEmpty();
 
-    centerScene(lasfiles);
+    dvec3 boxMin = {Infinity, Infinity, Infinity};
+    dvec3 boxMax = {-Infinity, -Infinity, -Infinity};
+
+    for (auto lasfile : lasfiles)
+    {
+        boxMin = glm::min(boxMin, lasfile->boxMin);
+        boxMax = glm::max(boxMax, lasfile->boxMax);
+    }
+
+    // zoom to point cloud
+    boxSize = boxMax - boxMin;
+    boxCenter = (boxMin + boxMax) / 2.0;
 }
 
 void LasLoaderSparse::spawnLoader()

@@ -6,23 +6,14 @@
 #include <Camera.h>
 #include <Debug.h>
 #include <Framebuffer.h>
-#include <OrbitControls.h>
 #include <Texture.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-Renderer *Renderer::Instance()
-{
-    static Renderer instance;
-    return &instance;
-}
-
 Renderer::Renderer()
 {
-    controls = std::make_shared<OrbitControls>();
     camera = make_shared<Camera>();
-    controls->setCamera(camera.get());
 
     View view1;
     view1.framebuffer = Framebuffer::create(128, 128);
@@ -48,10 +39,6 @@ void Renderer::renderOneFrame()
     Debug::clearFrameStats();
 
     EventQueue::instance()->process();
-
-    {
-        controls->update();
-    }
 
     { // UPDATE & RENDER
         auto selected = Runtime::getSelectedMethod();

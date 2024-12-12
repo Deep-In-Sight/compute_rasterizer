@@ -10,6 +10,8 @@
 using namespace std;
 
 int numPoints = 1'000'000;
+OrbitControls *orbitControls = nullptr;
+Renderer *renderer = nullptr;
 
 static void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                    const GLchar *message, const void *userParam)
@@ -54,7 +56,10 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 
     Runtime::mousePosition = {xpos, ypos};
 
-    Renderer::Instance()->controls->onMouseMove(xpos, ypos);
+    if (orbitControls != nullptr)
+    {
+        orbitControls->onMouseMove(xpos, ypos);
+    }
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
@@ -65,7 +70,10 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
         return;
     }
 
-    Renderer::Instance()->controls->onMouseScroll(xoffset, yoffset);
+    if (orbitControls != nullptr)
+    {
+        orbitControls->onMouseScroll(xoffset, yoffset);
+    }
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -91,7 +99,10 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         Runtime::mouseButtons = Runtime::mouseButtons & mask;
     }
 
-    Renderer::Instance()->controls->onMouseButton(button, action, mods);
+    if (orbitControls != nullptr)
+    {
+        orbitControls->onMouseButton(button, action, mods);
+    }
 }
 
 std::function<void(std::vector<std::string> &)> lasFilesDroppedCallback;
@@ -113,7 +124,8 @@ void drop_callback(GLFWwindow *, int count, const char **paths)
 
 void window_size_callback(GLFWwindow *window, int width, int height)
 {
-    Renderer::Instance()->setSize(width, height);
+    if (renderer != nullptr)
+        renderer->setSize(width, height);
 }
 
 int main()
@@ -178,7 +190,9 @@ int main()
 
     cout << std::setprecision(2) << std::fixed;
 
-    auto renderer = Renderer::Instance();
+    renderer = new Renderer();
+    orbitControls = new OrbitControls();
+    orbitControls->setCamera(renderer->camera.get());
     lasLoaderSparse = make_shared<LasLoaderSparse>();
 
     Runtime::lasLoaderSparse = lasLoaderSparse;
