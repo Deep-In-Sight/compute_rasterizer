@@ -12,6 +12,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm)
 
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(Qt5 5.15 REQUIRED COMPONENTS Quick)
 
 # opengl
 if(POLICY CMP0072)
@@ -28,6 +29,10 @@ set(COMPUTE_RASTERIZER_LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/unsuck_platform_specific.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CameraController.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudItem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/PointCloudItem.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudQuickRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
 
 set(COMPUTE_RASTERIZER_LIB_INCLUDES
@@ -54,12 +59,13 @@ set(EXTRA_INCLUDES
     ${GLFW3_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS})
 
-set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread)
+set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread Qt5::Quick)
 
 add_library(ComputeRasterizerLib STATIC ${COMPUTE_RASTERIZER_LIB_SRCS})
 target_include_directories(ComputeRasterizerLib
                            PUBLIC ${COMPUTE_RASTERIZER_LIB_INCLUDES})
 target_link_libraries(ComputeRasterizerLib PUBLIC ${LIBRARIES})
+set_target_properties(ComputeRasterizerLib PROPERTIES AUTOMOC ON)
 
 # Add the executable
 add_executable(
