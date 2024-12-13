@@ -11,7 +11,7 @@ using namespace std;
 
 int numPoints = 1'000'000;
 OrbitControls *orbitControls = nullptr;
-Renderer *renderer = nullptr;
+PointCloudRenderer *renderer = nullptr;
 
 static void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                    const GLchar *message, const void *userParam)
@@ -190,7 +190,7 @@ int main()
 
     cout << std::setprecision(2) << std::fixed;
 
-    renderer = new Renderer();
+    renderer = new PointCloudRenderer();
     orbitControls = new OrbitControls();
     orbitControls->setCamera(renderer->camera.get());
     lasLoaderSparse = make_shared<LasLoaderSparse>();

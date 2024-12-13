@@ -22,9 +22,9 @@ struct ShaderComponent
     string source = "";
     GLuint shader;
 
-    ShaderComponent(string path, GLuint shaderType)
+    ShaderComponent(const char *source, GLuint shaderType)
     {
-        this->path = path;
+        this->source = std::string(source);
         this->shaderType = shaderType;
     }
 };
@@ -38,14 +38,6 @@ struct Shader
 
     unordered_map<string, unsigned int> uniformLocations;
 
-    Shader(string vsPath, string fsPath)
-    {
-
-        setComponents({{vsPath, GL_VERTEX_SHADER}, {fsPath, GL_FRAGMENT_SHADER}});
-
-        // compile();
-    }
-
     Shader(vector<ShaderComponent> components)
     {
         setComponents(components);
@@ -58,11 +50,6 @@ struct Shader
         this->components = components;
 
         compile();
-
-        for (auto &component : components)
-        {
-            monitorFile(component.path, [&]() { compile(); });
-        }
     }
 
     void compile()
@@ -71,8 +58,6 @@ struct Shader
         for (auto &component : components)
         {
             cout << "compiling component " << component.path << endl;
-
-            component.source = readTextFile(component.path);
             bool compiled = compileShader(component);
 
             if (!compiled)

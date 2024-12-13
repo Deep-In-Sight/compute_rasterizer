@@ -22,8 +22,9 @@
 #include "GLTimerQueries.h"
 #include "LasLoaderSparse.h"
 #include "Method.h"
-#include "Renderer.h"
+#include "PointCloudRenderer.h"
 #include "Shader.h"
+#include "compute_loop_las_shaders.h"
 #include <Framebuffer.h>
 #include <Texture.h>
 
@@ -76,9 +77,9 @@ struct ComputeLoopLas : public Method
 
     shared_ptr<LasLoaderSparse> las = nullptr;
 
-    Renderer *renderer = nullptr;
+    PointCloudRenderer *renderer = nullptr;
 
-    ComputeLoopLas(Renderer *renderer, shared_ptr<LasLoaderSparse> las)
+    ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<LasLoaderSparse> las)
     {
 
         this->name = "loop_las";
@@ -92,8 +93,8 @@ struct ComputeLoopLas : public Method
         this->las = las;
         this->group = "10-10-10 bit encoded";
 
-        csRender = new Shader({{"./modules/compute_loop_las/render.cs", GL_COMPUTE_SHADER}});
-        csResolve = new Shader({{"./modules/compute_loop_las/resolve.cs", GL_COMPUTE_SHADER}});
+        csRender = new Shader({{render_cs, GL_COMPUTE_SHADER}});
+        csResolve = new Shader({{resolve_cs, GL_COMPUTE_SHADER}});
 
         ssFramebuffer = createBuffer(8 * 2048 * 2048);
 
@@ -112,11 +113,11 @@ struct ComputeLoopLas : public Method
         glClearNamedBufferData(ssFiles.handle, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
     }
 
-    void update(Renderer *renderer)
+    void update(PointCloudRenderer *renderer)
     {
     }
 
-    void render(Renderer *renderer)
+    void render(PointCloudRenderer *renderer)
     {
 
         GLTimerQueries::timestamp("compute-loop-start");

@@ -2,7 +2,7 @@
 #include "LasLoaderSparse.h"
 #include "unsuck.hpp"
 #include <OrbitControls.h>
-#include <Renderer.h>
+#include <PointCloudRenderer.h>
 
 #define STEPS_30BIT 1073741824
 #define MASK_30BIT 1073741823

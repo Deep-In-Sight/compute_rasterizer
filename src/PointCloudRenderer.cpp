@@ -1,7 +1,7 @@
 
-#include "Renderer.h"
 #include "GL/glew.h"
 #include "GLTimerQueries.h"
+#include "PointCloudRenderer.h"
 #include "Runtime.h"
 #include <Camera.h>
 #include <Debug.h>
@@ -11,7 +11,7 @@
 
 namespace fs = std::filesystem;
 
-Renderer::Renderer()
+PointCloudRenderer::PointCloudRenderer()
 {
     camera = make_shared<Camera>();
 
@@ -20,7 +20,7 @@ Renderer::Renderer()
     views.push_back(view1);
 }
 
-void Renderer::setSize(int width, int height)
+void PointCloudRenderer::setSize(int width, int height)
 {
     this->width = width;
     this->height = height;
@@ -28,12 +28,12 @@ void Renderer::setSize(int width, int height)
     views[0].framebuffer->setSize(width, height);
 }
 
-void Renderer::setTargetFbo(unsigned int fboId)
+void PointCloudRenderer::setTargetFbo(unsigned int fboId)
 {
     targetFboId = fboId;
 }
 
-void Renderer::renderOneFrame()
+void PointCloudRenderer::renderOneFrame()
 {
     GLTimerQueries::frameStart();
     Debug::clearFrameStats();

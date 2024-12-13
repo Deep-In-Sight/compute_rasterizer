@@ -3,7 +3,7 @@
 #include <Camera.h>
 #include <LasLoaderSparse.h>
 #include <OrbitControls.h>
-#include <Renderer.h>
+#include <PointCloudRenderer.h>
 #include <Runtime.h>
 #include <compute_loop_las/compute_loop_las.h>
 
@@ -13,6 +13,6 @@ using ::Camera;
 using ::ComputeLoopLas;
 using ::LasLoaderSparse;
 using ::OrbitControls;
-using ::Renderer;
+using ::PointCloudRenderer;
 using ::Runtime;
 } // namespace ComputeRenderer

@@ -25,7 +25,7 @@ set(COMPUTE_RASTERIZER_LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLTimerQueries.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLBuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OrbitControls.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/unsuck_platform_specific.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
@@ -69,6 +69,3 @@ add_executable(
 target_include_directories(ComputeRasterizerMain PUBLIC ${EXTRA_INCLUDES})
 # Link the libraries
 target_link_libraries(ComputeRasterizerMain ComputeRasterizerLib)
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/modules
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

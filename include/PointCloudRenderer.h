@@ -18,9 +18,9 @@ struct View
     std::shared_ptr<Framebuffer> framebuffer = nullptr;
 };
 
-struct Renderer
+struct PointCloudRenderer
 {
-    Renderer();
+    PointCloudRenderer();
     std::shared_ptr<Camera> camera = nullptr;
     std::vector<View> views;
 

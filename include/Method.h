@@ -5,7 +5,7 @@
 
 using std::string;
 
-struct Renderer;
+struct PointCloudRenderer;
 
 struct Method
 {
@@ -19,6 +19,6 @@ struct Method
     {
     }
 
-    virtual void update(Renderer *renderer) = 0;
-    virtual void render(Renderer *renderer) = 0;
+    virtual void update(PointCloudRenderer *renderer) = 0;
+    virtual void render(PointCloudRenderer *renderer) = 0;
 };
