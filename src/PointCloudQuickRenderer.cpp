@@ -16,9 +16,7 @@ PointCloudQuickRenderer::PointCloudQuickRenderer()
     pcdRenderer = std::make_shared<PointCloudRenderer>();
     lasLoader = std::make_shared<LasLoaderSparse>();
     cameraController = std::make_shared<CameraController>(pcdRenderer->camera.get());
-    auto computeLoopLas = new ComputeLoopLas(pcdRenderer.get(), lasLoader);
-    Runtime::addMethod(computeLoopLas);
-    Runtime::setSelectedMethod(computeLoopLas->name);
+    pcdRenderer->computeLoopLas = std::make_shared<ComputeLoopLas>(pcdRenderer.get(), lasLoader);
 }
 
 void PointCloudQuickRenderer::addLasFiles(const std::vector<std::string> &lasPaths)

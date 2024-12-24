@@ -1,12 +1,13 @@
 
+#include "PointCloudRenderer.h"
 #include "GL/glew.h"
 #include "GLTimerQueries.h"
-#include "PointCloudRenderer.h"
 #include "Runtime.h"
 #include <Camera.h>
 #include <Debug.h>
 #include <Framebuffer.h>
 #include <Texture.h>
+#include <compute_loop_las/compute_loop_las.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -41,11 +42,10 @@ void PointCloudRenderer::renderOneFrame()
     EventQueue::instance()->process();
 
     { // UPDATE & RENDER
-        auto selected = Runtime::getSelectedMethod();
-        if (selected)
+        if (computeLoopLas != nullptr)
         {
-            selected->update(this);
-            selected->render(this);
+            computeLoopLas->update(this);
+            computeLoopLas->render(this);
         }
     }
 

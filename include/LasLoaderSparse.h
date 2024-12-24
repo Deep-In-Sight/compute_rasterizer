@@ -5,7 +5,6 @@
 #include <string>
 
 #include "Shader.h"
-#include "TaskPool.h"
 #include "glm/common.hpp"
 #include "glm/matrix.hpp"
 #include "glm/vec3.hpp"

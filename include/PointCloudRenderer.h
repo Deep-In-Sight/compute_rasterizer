@@ -10,6 +10,7 @@
 
 struct Camera;
 struct Framebuffer;
+struct ComputeLoopLas;
 
 struct View
 {
@@ -22,6 +23,7 @@ struct PointCloudRenderer
 {
     PointCloudRenderer();
     std::shared_ptr<Camera> camera = nullptr;
+    std::shared_ptr<ComputeLoopLas> computeLoopLas = nullptr;
     std::vector<View> views;
 
     int width = 0;

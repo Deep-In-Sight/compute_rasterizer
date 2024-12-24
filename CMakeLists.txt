@@ -12,7 +12,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm)
 
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(Qt5 5.15 REQUIRED COMPONENTS Quick)
+find_package(Qt5 REQUIRED COMPONENTS Quick)
 
 # opengl
 if(POLICY CMP0072)
@@ -33,7 +33,8 @@ set(COMPUTE_RASTERIZER_LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudItem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/PointCloudItem.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudQuickRenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/compute_loop_las/compute_loop_las.cpp)
 
 set(COMPUTE_RASTERIZER_LIB_INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/modules

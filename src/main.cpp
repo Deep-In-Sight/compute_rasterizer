@@ -1,5 +1,5 @@
 #include "LasLoaderSparse.h"
-#include "Renderer.h"
+#include "PointCloudRenderer.h"
 #include "Runtime.h"
 #include "compute_loop_las/compute_loop_las.h"
 #include <ImGuiOverlay.h>
@@ -198,9 +198,7 @@ int main()
     Runtime::lasLoaderSparse = lasLoaderSparse;
 
     { // 4-4-4 byte format
-        auto computeLoopLas = new ComputeLoopLas(renderer, lasLoaderSparse);
-        Runtime::addMethod(computeLoopLas);
-        Runtime::setSelectedMethod("loop_las");
+        renderer->computeLoopLas = std::make_shared<ComputeLoopLas>(renderer, lasLoaderSparse);
     }
 
     ImGuiInit(window);

@@ -1,6 +1,7 @@
 #include <CameraController.h>
 #include <PointCloudItem.h>
 #include <PointCloudQuickRenderer.h>
+#include <QDebug>
 #include <QMimeData>
 #include <QQuickWindow>
 
@@ -11,6 +12,9 @@ PointCloudItem::PointCloudItem(QQuickItem *parent) : QQuickFramebufferObject(par
     setAcceptTouchEvents(true);
     setMirrorVertically(true); // conform to opengl texture coordinates
     setTextureFollowsItemSize(true);
+    static int itemCounter = 0;
+    item_name = QString("PointCloudItem") + QString::number(itemCounter++);
+    qDebug() << item_name << " Created";
 }
 
 void PointCloudItem::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -52,6 +56,7 @@ void PointCloudItem::dropEvent(QDropEvent *event)
         m_renderer->getSceneBox(center, size);
         cameraController->setCenterView({center[0], center[1], center[2]});
     }
+    qDebug() << item_name << " Dropped " << lasPaths.size() << " files";
 }
 
 CameraController::MouseButton buttonMap(Qt::MouseButton b)

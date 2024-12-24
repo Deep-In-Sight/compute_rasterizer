@@ -381,11 +381,6 @@ void LasLoaderSparse::add(vector<string> files)
         }
     };
 
-    auto cpuData = getCpuData();
-    int numThreads = cpuData.numProcessors;
-
-    TaskPool<Task> pool(numThreads, processor);
-
     for (auto file : files)
     {
         auto task = make_shared<Task>();
@@ -393,11 +388,8 @@ void LasLoaderSparse::add(vector<string> files)
         task->fileIndex = this->numFiles;
         this->numFiles++;
 
-        pool.addTask(task);
+        processor(task);
     }
-
-    pool.close();
-    pool.waitTillEmpty();
 
     dvec3 boxMin = {Infinity, Infinity, Infinity};
     dvec3 boxMax = {-Infinity, -Infinity, -Infinity};
