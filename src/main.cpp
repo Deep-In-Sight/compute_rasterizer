@@ -1,5 +1,5 @@
-#include "LasLoaderSparse.h"
 #include "PointCloudRenderer.h"
+#include "PointManager.h"
 #include "Runtime.h"
 #include "compute_loop_las/compute_loop_las.h"
 #include <ImGuiOverlay.h>
@@ -106,7 +106,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 }
 
 std::function<void(std::vector<std::string> &)> lasFilesDroppedCallback;
-std::shared_ptr<LasLoaderSparse> lasLoaderSparse = nullptr;
+std::shared_ptr<PointManager> lasLoaderSparse = nullptr;
 void drop_callback(GLFWwindow *, int count, const char **paths)
 {
     vector<string> files;
@@ -193,7 +193,7 @@ int main()
     renderer = new PointCloudRenderer();
     orbitControls = new OrbitControls();
     orbitControls->setCamera(renderer->camera.get());
-    lasLoaderSparse = make_shared<LasLoaderSparse>();
+    lasLoaderSparse = make_shared<PointManager>();
 
     Runtime::lasLoaderSparse = lasLoaderSparse;
 

@@ -19,6 +19,7 @@ if(POLICY CMP0072)
   cmake_policy(SET CMP0072 NEW)
 endif()
 find_package(OpenGL REQUIRED)
+find_package(PDAL REQUIRED)
 
 # Add all cpp files under CMAKE_CURRENT_SOURCE_DIR/src to the SOURCES variable
 set(COMPUTE_RASTERIZER_LIB_SRCS
@@ -33,7 +34,7 @@ set(COMPUTE_RASTERIZER_LIB_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudItem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/PointCloudItem.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PointCloudQuickRenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/LasLoaderSparse.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PointManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/modules/compute_loop_las/compute_loop_las.cpp)
 
 set(COMPUTE_RASTERIZER_LIB_INCLUDES
@@ -60,7 +61,10 @@ set(EXTRA_INCLUDES
     ${GLFW3_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS})
 
-set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread Qt5::Quick)
+message("PDAL_INCLUDE_DIRS: ${PDAL_INCLUDE_DIRS}")
+message("PDAL_LIBRARIES: ${PDAL_LIBRARIES}")
+
+set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread Qt5::Quick ${PDAL_LIBRARIES})
 
 add_library(ComputeRasterizerLib STATIC ${COMPUTE_RASTERIZER_LIB_SRCS})
 target_include_directories(ComputeRasterizerLib

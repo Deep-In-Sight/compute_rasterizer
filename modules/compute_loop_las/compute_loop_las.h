@@ -10,7 +10,7 @@
 #include <string>
 
 struct Buffer;
-struct LasLoaderSparse;
+struct PointManager;
 struct PointCloudRenderer;
 
 struct ComputeLoopLas : public Method
@@ -54,11 +54,11 @@ struct ComputeLoopLas : public Method
     UniformData uniformData;
     std::shared_ptr<Buffer> ssFilesBuffer;
 
-    std::shared_ptr<LasLoaderSparse> las = nullptr;
+    std::shared_ptr<PointManager> pointManager = nullptr;
 
     PointCloudRenderer *renderer = nullptr;
 
-    ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<LasLoaderSparse> las);
+    ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<PointManager> pointManager);
     void update(PointCloudRenderer *renderer);
     void render(PointCloudRenderer *renderer);
 };

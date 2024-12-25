@@ -7,7 +7,8 @@
 #include <vector>
 
 struct PointCloudRenderer;
-struct LasLoaderSparse;
+struct PointManager;
+struct LasReader;
 struct CameraController;
 
 class PointCloudQuickRenderer : public QQuickFramebufferObject::Renderer
@@ -28,6 +29,6 @@ class PointCloudQuickRenderer : public QQuickFramebufferObject::Renderer
     void initialize();
     QRectF viewportSize;
     std::shared_ptr<PointCloudRenderer> pcdRenderer;
-    std::shared_ptr<LasLoaderSparse> lasLoader;
+    std::shared_ptr<PointManager> pointLoader;
     std::shared_ptr<CameraController> cameraController;
 };

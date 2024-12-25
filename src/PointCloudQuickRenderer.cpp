@@ -1,9 +1,10 @@
 #include <CameraController.h>
 #include <GL/glew.h>
-#include <LasLoaderSparse.h>
+#include <LasReader.h>
 #include <PointCloudItem.h>
 #include <PointCloudQuickRenderer.h>
 #include <PointCloudRenderer.h>
+#include <PointManager.h>
 #include <QMimeData>
 #include <QOpenGLFramebufferObject>
 #include <Runtime.h>
@@ -14,20 +15,20 @@ PointCloudQuickRenderer::PointCloudQuickRenderer()
 {
     initialize();
     pcdRenderer = std::make_shared<PointCloudRenderer>();
-    lasLoader = std::make_shared<LasLoaderSparse>();
+    pointLoader = std::make_shared<PointManager>();
     cameraController = std::make_shared<CameraController>(pcdRenderer->camera.get());
-    pcdRenderer->computeLoopLas = std::make_shared<ComputeLoopLas>(pcdRenderer.get(), lasLoader);
+    pcdRenderer->computeLoopLas = std::make_shared<ComputeLoopLas>(pcdRenderer.get(), pointLoader);
 }
 
 void PointCloudQuickRenderer::addLasFiles(const std::vector<std::string> &lasPaths)
 {
-    lasLoader->add(lasPaths);
+    pointLoader->addFiles(lasPaths);
 }
 
 void PointCloudQuickRenderer::getSceneBox(glm::dvec3 &center, glm::dvec3 &size)
 {
-    center = lasLoader->boxCenter;
-    size = lasLoader->boxSize;
+    center = pointLoader->boxCenter;
+    size = pointLoader->boxSize;
 }
 
 CameraController *PointCloudQuickRenderer::getCameraController()

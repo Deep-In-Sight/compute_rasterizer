@@ -9,7 +9,7 @@
 
 #include "Method.h"
 
-#include "LasLoaderSparse.h"
+#include "PointManager.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ struct Runtime
     inline static vector<int> keyStates = vector<int>(65536, 0);
     inline static glm::dvec2 mousePosition = {0.0, 0.0};
     inline static int mouseButtons = 0;
-    inline static shared_ptr<LasLoaderSparse> lasLoaderSparse = nullptr;
+    inline static shared_ptr<PointManager> lasLoaderSparse = nullptr;
 
     Runtime()
     {

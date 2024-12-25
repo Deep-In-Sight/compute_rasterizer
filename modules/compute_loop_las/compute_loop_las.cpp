@@ -21,9 +21,9 @@
 #include "Debug.h"
 #include "Frustum.h"
 #include "GLTimerQueries.h"
-#include "LasLoaderSparse.h"
 #include "Method.h"
 #include "PointCloudRenderer.h"
+#include "PointManager.h"
 #include "Shader.h"
 #include "compute_loop_las_shaders.h"
 #include <Framebuffer.h>
@@ -34,7 +34,7 @@ using namespace std::chrono_literals;
 
 using glm::ivec2;
 
-ComputeLoopLas::ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<LasLoaderSparse> las)
+ComputeLoopLas::ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<PointManager> pointManager)
 {
 
     this->name = "loop_las";
@@ -45,7 +45,7 @@ ComputeLoopLas::ComputeLoopLas(PointCloudRenderer *renderer, shared_ptr<LasLoade
 - Workgroup picks 10, 20 or 30 bit precision
   depending on screen size of bounding box
 		)ER01";
-    this->las = las;
+    this->pointManager = pointManager;
     this->group = "10-10-10 bit encoded";
 
     csRender = new Shader({{render_cs, GL_COMPUTE_SHADER}});
@@ -77,9 +77,9 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
 
     GLTimerQueries::timestamp("compute-loop-start");
 
-    las->process();
+    pointManager->uploadQueuedPoints();
 
-    if (las->numPointsLoaded == 0)
+    if (pointManager->numPointsLoaded == 0)
     {
         return;
     }
@@ -115,7 +115,7 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
             uniformData.transformFrustum = worldViewProj;
         }
         uniformData.pointsPerThread = POINTS_PER_THREAD;
-        uniformData.numPoints = las->numPointsLoaded;
+        uniformData.numPoints = pointManager->numPointsLoaded;
         uniformData.enableFrustumCulling = Debug::frustumCullingEnabled ? 1 : 0;
         uniformData.showBoundingBox = Debug::showBoundingBox ? 1 : 0;
         uniformData.imageSize = {fbo->width, fbo->height};
@@ -127,11 +127,10 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
 
     { // update file buffer
 
-        for (int i = 0; i < las->files.size(); i++)
+        for (int i = 0; i < 1; i++)
         {
-            auto lasfile = las->files[i];
-
-            dmat4 world = glm::translate(dmat4(), lasfile->boxMin);
+            auto box_min = pointManager->boxCenter - pointManager->boxSize / 2.0;
+            dmat4 world = glm::translate(dmat4(), box_min);
             dmat4 view = renderer->camera->view;
             dmat4 proj = renderer->camera->proj;
             dmat4 worldView = view * world;
@@ -140,17 +139,17 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
             mat4 transform = worldViewProj;
             mat4 fWorld = world;
 
-            memcpy(ssFilesBuffer->data_u8 + 256 * lasfile->fileIndex + 0, glm::value_ptr(transform), 64);
+            memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 0, glm::value_ptr(transform), 64);
 
             if (Debug::updateFrustum)
             {
-                memcpy(ssFilesBuffer->data_u8 + 256 * lasfile->fileIndex + 64, glm::value_ptr(transform), 64);
+                memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 64, glm::value_ptr(transform), 64);
             }
 
-            memcpy(ssFilesBuffer->data_u8 + 256 * lasfile->fileIndex + 128, glm::value_ptr(fWorld), 64);
+            memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 128, glm::value_ptr(fWorld), 64);
         }
 
-        glNamedBufferSubData(ssFiles.handle, 0, 256 * las->files.size(), ssFilesBuffer->data);
+        glNamedBufferSubData(ssFiles.handle, 0, 256, ssFilesBuffer->data);
     }
 
     if (Debug::enableShaderDebugValue)
@@ -174,19 +173,19 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 30, ssDebug.handle);
         glBindBufferBase(GL_UNIFORM_BUFFER, 31, uniformBuffer.handle);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 40, las->ssBatches.handle);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 41, las->ssXyzHig.handle);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 42, las->ssXyzMed.handle);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 43, las->ssXyzLow.handle);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 44, las->ssColors.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 40, pointManager->ssBatches.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 41, pointManager->ssXyzHig.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 42, pointManager->ssXyzMed.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 43, pointManager->ssXyzLow.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 44, pointManager->ssColors.handle);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 45, ssFiles.handle);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 50, ssBoundingBoxes.handle);
 
         glBindImageTexture(0, fbo->colorAttachments[0]->handle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8UI);
 
-        // int numBatches = ceil(double(las->numPointsLoaded) / double(POINTS_PER_WORKGROUP));
-        int numBatches = las->numBatchesLoaded;
+        // int numBatches = ceil(double(pointManager->numPointsLoaded) / double(POINTS_PER_WORKGROUP));
+        int numBatches = pointManager->numBatchesLoaded;
 
         glDispatchCompute(numBatches, 1, 1);
 
@@ -203,7 +202,7 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssFramebuffer.handle);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 30, ssDebug.handle);
         glBindBufferBase(GL_UNIFORM_BUFFER, 31, uniformBuffer.handle);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 44, las->ssColors.handle);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 44, pointManager->ssColors.handle);
 
         glBindImageTexture(0, fbo->colorAttachments[0]->handle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8UI);
 
