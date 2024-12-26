@@ -102,7 +102,7 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
     auto bXyzHig = make_shared<Buffer>(4 * numPoints);
     auto bColors = make_shared<Buffer>(4 * numPoints);
 
-    dvec3 boxMin(source->boxMin[0], source->boxMin[1], source->boxMin[2]);
+    dvec3 boxMin = source->box.min;
 
     // load batches/points
     for (int batchIndex = 0; batchIndex < numBatches; batchIndex++)
@@ -112,12 +112,12 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
         // compute batch bounding box
         for (int i = 0; i < batch.numPoints; i++)
         {
-            int index_pointFile = batch.chunk_pointOffset + i;
+            int index_pointFile = batch.file_pointOffset + i;
             auto point = source->points[index_pointFile];
 
-            double x = point.x;
-            double y = point.y;
-            double z = point.z;
+            double x = point.x - boxMin.x;
+            double y = point.y - boxMin.y;
+            double z = point.z - boxMin.z;
 
             batch.min.x = std::min(batch.min.x, x);
             batch.min.y = std::min(batch.min.y, y);
@@ -140,19 +140,20 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
             bBatches->set<float>(batch.max.z, batchByteOffset + 24);
             bBatches->set<uint32_t>(batch.numPoints, batchByteOffset + 28);
             bBatches->set<uint32_t>(batch.sparse_pointOffset, batchByteOffset + 32);
-            // bBatches->set<uint32_t>(lasfile->fileIndex, batchByteOffset + 36);
-            bBatches->set<uint32_t>(0, batchByteOffset + 36);
+            bBatches->set<uint32_t>(task.cloudIdx, batchByteOffset + 36);
+            // bBatches->set<uint32_t>(0, batchByteOffset + 36);
         }
 
         // load data
         for (int i = 0; i < batch.numPoints; i++)
         {
-            int index_pointFile = batch.chunk_pointOffset + i;
+            int index_pointFile = batch.file_pointOffset + i;
+            int index_pointTask = batch.chunk_pointOffset + i;
             auto point = source->points[index_pointFile];
 
-            double x = point.x;
-            double y = point.y;
-            double z = point.z;
+            double x = point.x - boxMin.x;
+            double y = point.y - boxMin.y;
+            double z = point.z - boxMin.z;
 
             uint32_t X30 = uint32_t(((x - batch.min.x) / batchBoxSize.x) * STEPS_30BIT);
             uint32_t Y30 = uint32_t(((y - batch.min.y) / batchBoxSize.y) * STEPS_30BIT);
@@ -169,7 +170,7 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
 
                 uint32_t encoded = X_low | (Y_low << 10) | (Z_low << 20);
 
-                bXyzLow->set<uint32_t>(encoded, 4 * index_pointFile);
+                bXyzLow->set<uint32_t>(encoded, 4 * index_pointTask);
             }
 
             { // med
@@ -179,7 +180,7 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
 
                 uint32_t encoded = X_med | (Y_med << 10) | (Z_med << 20);
 
-                bXyzMed->set<uint32_t>(encoded, 4 * index_pointFile);
+                bXyzMed->set<uint32_t>(encoded, 4 * index_pointTask);
             }
 
             { // hig
@@ -189,18 +190,18 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
 
                 uint32_t encoded = X_hig | (Y_hig << 10) | (Z_hig << 20);
 
-                bXyzHig->set<uint32_t>(encoded, 4 * index_pointFile);
+                bXyzHig->set<uint32_t>(encoded, 4 * index_pointTask);
             }
 
             { // RGB
 
-                uint8_t R = point.r;
-                uint8_t G = point.g;
-                uint8_t B = point.b;
+                int R = point.r;
+                int G = point.g;
+                int B = point.b;
 
                 uint32_t color = R | (G << 8) | (B << 16);
 
-                bColors->set<uint32_t>(color, 4 * index_pointFile);
+                bColors->set<uint32_t>(color, 4 * index_pointTask);
             }
         }
     }
@@ -246,7 +247,7 @@ void PointManager::spawnLoader()
             auto result = loadPoints(task);
 
             UploadTask uploadTask;
-            uploadTask.sparse_pointOffset = task.sparse_pointOffset;
+            uploadTask.sparse_pointOffset = result->sparse_pointOffset;
             uploadTask.numPoints = task.numPoints;
             uploadTask.numBatches = result->numBatches;
             uploadTask.bXyzLow = result->bXyzLow;
@@ -257,7 +258,6 @@ void PointManager::spawnLoader()
 
             unique_lock<mutex> lock_upload(ref->mtx_upload);
             ref->uploadTasks.push_back(uploadTask);
-            std::cout << "push upload task: " << ref->uploadTasks.size() << std::endl;
             lock_upload.unlock();
         }
     });
@@ -378,12 +378,12 @@ PointCloudPtr pdal_readLAS(const string &path)
     // Extract bounding box
     pdal::BOX3D bounds;
     pointView->calculateBounds(bounds);
-    cloud->boxMin[0] = bounds.minx;
-    cloud->boxMin[1] = bounds.miny;
-    cloud->boxMin[2] = bounds.minz;
-    cloud->boxMax[0] = bounds.maxx;
-    cloud->boxMax[1] = bounds.maxy;
-    cloud->boxMax[2] = bounds.maxz;
+    cloud->box.min[0] = bounds.minx;
+    cloud->box.min[1] = bounds.miny;
+    cloud->box.min[2] = bounds.minz;
+    cloud->box.max[0] = bounds.maxx;
+    cloud->box.max[1] = bounds.maxy;
+    cloud->box.max[2] = bounds.maxz;
 
     return cloud;
 }
@@ -435,16 +435,11 @@ void PointManager::addPoints(PointCloudPtr cloud)
     this->numPoints += numPoints;
     this->numBatches += numBatches;
     this->numClouds++;
+    this->boxes.push_back(cloud->box);
 
-    // compute bounding box
-    dvec3 cloudMin = dvec3(cloud->boxMin[0], cloud->boxMin[1], cloud->boxMin[2]);
-    dvec3 cloudMax = dvec3(cloud->boxMax[0], cloud->boxMax[1], cloud->boxMax[2]);
-    auto boxMin = boxCenter - boxSize / 2.0;
-    auto boxMax = boxCenter + boxSize / 2.0;
-    boxMin = glm::min(boxMin, cloudMin);
-    boxMax = glm::max(boxMax, cloudMax);
-    this->boxCenter = (boxMin + boxMax) / 2.0;
-    this->boxSize = boxMax - boxMin;
+    // compute global bounding box
+    bb.min = glm::min(bb.min, cloud->box.min);
+    bb.max = glm::max(bb.max, cloud->box.max);
 }
 
 void PointManager::clearPoints()

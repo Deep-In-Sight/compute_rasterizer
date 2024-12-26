@@ -9,6 +9,7 @@
 #include "glm/matrix.hpp"
 #include "glm/vec3.hpp"
 #include "unsuck.hpp"
+#include <Box.h>
 #include <GLBuffer.h>
 #include <future>
 #include <glm/gtx/transform.hpp>
@@ -64,8 +65,7 @@ struct PointRGB
 struct PointCloud
 {
     std::vector<PointRGB> points;
-    double boxMin[3];
-    double boxMax[3];
+    Box box;
 };
 
 typedef std::shared_ptr<PointCloud> PointCloudPtr;
@@ -111,6 +111,7 @@ struct PointManager
     int64_t numBatches = 0;
     int64_t numBatchesLoaded = 0;
     int64_t numClouds = 0;
+    std::vector<Box> boxes;
 
     GLBuffer ssBatches;
     GLBuffer ssXyzLow;
@@ -128,6 +129,5 @@ struct PointManager
 
     void uploadQueuedPoints();
 
-    glm::dvec3 boxCenter = {0.0, 0.0, 0.0};
-    glm::dvec3 boxSize = {0.0, 0.0, 0.0};
+    Box bb;
 };

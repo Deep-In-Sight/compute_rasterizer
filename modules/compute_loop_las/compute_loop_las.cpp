@@ -127,9 +127,9 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
 
     { // update file buffer
 
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < pointManager->boxes.size(); i++)
         {
-            auto box_min = pointManager->boxCenter - pointManager->boxSize / 2.0;
+            auto box_min = pointManager->boxes[i].min;
             dmat4 world = glm::translate(dmat4(), box_min);
             dmat4 view = renderer->camera->view;
             dmat4 proj = renderer->camera->proj;
@@ -139,17 +139,17 @@ void ComputeLoopLas::render(PointCloudRenderer *renderer)
             mat4 transform = worldViewProj;
             mat4 fWorld = world;
 
-            memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 0, glm::value_ptr(transform), 64);
+            memcpy(ssFilesBuffer->data_u8 + 256 * i + 0, glm::value_ptr(transform), 64);
 
             if (Debug::updateFrustum)
             {
-                memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 64, glm::value_ptr(transform), 64);
+                memcpy(ssFilesBuffer->data_u8 + 256 * i + 64, glm::value_ptr(transform), 64);
             }
 
-            memcpy(ssFilesBuffer->data_u8 + 256 * 0 + 128, glm::value_ptr(fWorld), 64);
+            memcpy(ssFilesBuffer->data_u8 + 256 * i + 128, glm::value_ptr(fWorld), 64);
         }
 
-        glNamedBufferSubData(ssFiles.handle, 0, 256, ssFilesBuffer->data);
+        glNamedBufferSubData(ssFiles.handle, 0, 256 * pointManager->boxes.size(), ssFilesBuffer->data);
     }
 
     if (Debug::enableShaderDebugValue)

@@ -17,6 +17,7 @@ PointCloudQuickRenderer::PointCloudQuickRenderer()
     pcdRenderer = std::make_shared<PointCloudRenderer>();
     pointLoader = std::make_shared<PointManager>();
     cameraController = std::make_shared<CameraController>(pcdRenderer->camera.get());
+    cameraController->setSpeed({0.01, 0.1, 5});
     pcdRenderer->computeLoopLas = std::make_shared<ComputeLoopLas>(pcdRenderer.get(), pointLoader);
 }
 
@@ -27,8 +28,8 @@ void PointCloudQuickRenderer::addLasFiles(const std::vector<std::string> &lasPat
 
 void PointCloudQuickRenderer::getSceneBox(glm::dvec3 &center, glm::dvec3 &size)
 {
-    center = pointLoader->boxCenter;
-    size = pointLoader->boxSize;
+    center = pointLoader->bb.center();
+    size = pointLoader->bb.size();
 }
 
 CameraController *PointCloudQuickRenderer::getCameraController()
