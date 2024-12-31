@@ -52,9 +52,9 @@ void PointCloudItem::dropEvent(QDropEvent *event)
     if (!lasPaths.empty())
     {
         m_renderer->addLasFiles(lasPaths);
-        glm::dvec3 center, size;
-        m_renderer->getSceneBox(center, size);
-        cameraController->setCenterView({center[0], center[1], center[2]});
+        // glm::dvec3 center, size;
+        // m_renderer->getSceneBox(center, size);
+        // cameraController->setCenterView({center[0], center[1], center[2]});
     }
     qDebug() << item_name << " Dropped " << lasPaths.size() << " files";
 }

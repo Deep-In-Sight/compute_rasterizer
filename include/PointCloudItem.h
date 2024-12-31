@@ -27,7 +27,7 @@ class PointCloudItem : public QQuickFramebufferObject
 
     QQuickFramebufferObject::Renderer *createRenderer() const override;
 
-  private:
+  protected:
     mutable PointCloudQuickRenderer *m_renderer = nullptr;
     mutable CameraController *cameraController = nullptr;
     QString item_name;

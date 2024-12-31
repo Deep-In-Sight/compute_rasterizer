@@ -13,6 +13,8 @@
 #include <GLBuffer.h>
 #include <future>
 #include <glm/gtx/transform.hpp>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 namespace fs = std::filesystem;
 
@@ -52,23 +54,9 @@ struct Batch
     glm::dvec3 max = {-Infinity, -Infinity, -Infinity};
 };
 
-struct PointRGB
-{
-    double x;
-    double y;
-    double z;
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-};
-
-struct PointCloud
-{
-    std::vector<PointRGB> points;
-    Box box;
-};
-
-typedef std::shared_ptr<PointCloud> PointCloudPtr;
+typedef pcl::PointXYZRGBNormal Point;
+typedef pcl::PointCloud<Point> PointCloud;
+typedef PointCloud::Ptr PointCloudPtr;
 
 // load numPoints, starting from firstPoint from the source
 struct LoadTask
@@ -78,6 +66,7 @@ struct LoadTask
     int64_t firstPoint;
     int64_t numPoints;
     PointCloudPtr source;
+    Box bb;
 };
 
 // upload numPoints, to global GPU buffers, starting from sparse_pointOffset
@@ -120,6 +109,7 @@ struct PointManager
     GLBuffer ssColors;
 
     PointManager();
+    ~PointManager();
 
     void addFiles(const std::vector<std::string> &lasPaths);
     void addPoints(PointCloudPtr cloud);
@@ -130,4 +120,7 @@ struct PointManager
     void uploadQueuedPoints();
 
     Box bb;
+    bool clear_deferred = false;
+    std::atomic<bool> stop_flag{false};
+    std::vector<std::thread> loader_threads;
 };

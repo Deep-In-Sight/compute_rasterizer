@@ -20,6 +20,7 @@ if(POLICY CMP0072)
 endif()
 find_package(OpenGL REQUIRED)
 find_package(PDAL REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common)
 
 # Add all cpp files under CMAKE_CURRENT_SOURCE_DIR/src to the SOURCES variable
 set(COMPUTE_RASTERIZER_LIB_SRCS
@@ -64,7 +65,7 @@ set(EXTRA_INCLUDES
 message("PDAL_INCLUDE_DIRS: ${PDAL_INCLUDE_DIRS}")
 message("PDAL_LIBRARIES: ${PDAL_LIBRARIES}")
 
-set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread Qt5::Quick ${PDAL_LIBRARIES})
+set(LIBRARIES GLEW::GLEW glfw OpenGL::GL pthread Qt5::Quick ${PDAL_LIBRARIES} ${PCL_LIBRARIES})
 
 add_library(ComputeRasterizerLib STATIC ${COMPUTE_RASTERIZER_LIB_SRCS})
 target_include_directories(ComputeRasterizerLib

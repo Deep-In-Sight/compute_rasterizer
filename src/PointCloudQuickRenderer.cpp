@@ -18,6 +18,7 @@ PointCloudQuickRenderer::PointCloudQuickRenderer()
     pointLoader = std::make_shared<PointManager>();
     cameraController = std::make_shared<CameraController>(pcdRenderer->camera.get());
     cameraController->setSpeed({0.01, 0.1, 5});
+    cameraController->setPosition({0, 0, 10});
     pcdRenderer->computeLoopLas = std::make_shared<ComputeLoopLas>(pcdRenderer.get(), pointLoader);
 }
 

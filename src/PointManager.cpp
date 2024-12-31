@@ -3,6 +3,7 @@
 #include "unsuck.hpp"
 #include <OrbitControls.h>
 #include <PointCloudRenderer.h>
+#include <pcl/common/common.h>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/io/LasReader.hpp>
@@ -59,6 +60,15 @@ PointManager::PointManager()
     }
 }
 
+PointManager::~PointManager()
+{
+    stop_flag = true;
+    for (auto &thread : loader_threads)
+    {
+        thread.join();
+    }
+}
+
 shared_ptr<LoadResult> loadPoints(LoadTask task)
 {
     auto source = task.source;
@@ -102,7 +112,7 @@ shared_ptr<LoadResult> loadPoints(LoadTask task)
     auto bXyzHig = make_shared<Buffer>(4 * numPoints);
     auto bColors = make_shared<Buffer>(4 * numPoints);
 
-    dvec3 boxMin = source->box.min;
+    dvec3 boxMin = task.bb.min;
 
     // load batches/points
     for (int batchIndex = 0; batchIndex < numBatches; batchIndex++)
@@ -223,10 +233,9 @@ void PointManager::spawnLoader()
 
     auto ref = this;
 
-    thread t([ref]() {
-        while (true)
+    loader_threads.emplace_back([ref]() {
+        while (!ref->stop_flag)
         {
-
             std::this_thread::sleep_for(10ms);
 
             unique_lock<mutex> lock_load(ref->mtx_load);
@@ -261,7 +270,6 @@ void PointManager::spawnLoader()
             lock_upload.unlock();
         }
     });
-    t.detach();
 }
 
 void PointManager::uploadQueuedPoints()
@@ -359,32 +367,21 @@ PointCloudPtr pdal_readLAS(const string &path)
     }
 
     // Create the PointCloud structure
-    PointCloudPtr cloud = make_shared<PointCloud>();
+    PointCloudPtr cloud(new PointCloud());
 
     // Extract points
     for (pdal::PointId i = 0; i < pointView->size(); ++i)
     {
-        PointRGB point;
-        point.x = pointView->getFieldAs<double>(pdal::Dimension::Id::X, i);
-        point.y = pointView->getFieldAs<double>(pdal::Dimension::Id::Y, i);
-        point.z = pointView->getFieldAs<double>(pdal::Dimension::Id::Z, i);
+        Point point;
+        point.x = pointView->getFieldAs<float>(pdal::Dimension::Id::X, i);
+        point.y = pointView->getFieldAs<float>(pdal::Dimension::Id::Y, i);
+        point.z = pointView->getFieldAs<float>(pdal::Dimension::Id::Z, i);
         point.r = static_cast<uint8_t>(pointView->getFieldAs<uint16_t>(pdal::Dimension::Id::Red, i) / 256);
         point.g = static_cast<uint8_t>(pointView->getFieldAs<uint16_t>(pdal::Dimension::Id::Green, i) / 256);
         point.b = static_cast<uint8_t>(pointView->getFieldAs<uint16_t>(pdal::Dimension::Id::Blue, i) / 256);
 
-        cloud->points.push_back(point);
+        cloud->push_back(point);
     }
-
-    // Extract bounding box
-    pdal::BOX3D bounds;
-    pointView->calculateBounds(bounds);
-    cloud->box.min[0] = bounds.minx;
-    cloud->box.min[1] = bounds.miny;
-    cloud->box.min[2] = bounds.minz;
-    cloud->box.max[0] = bounds.maxx;
-    cloud->box.max[1] = bounds.maxy;
-    cloud->box.max[2] = bounds.maxz;
-
     return cloud;
 }
 
@@ -401,29 +398,33 @@ void PointManager::addFiles(const vector<string> &paths)
         {
             throw std::runtime_error("Unsupported file format.");
         }
-        std::cout << "Loaded " << cloud->points.size() << " points from " << path << std::endl;
+        // std::cout << "Loaded " << cloud->points.size() << " points from " << path << std::endl;
         addPoints(cloud);
     }
 }
 
 void PointManager::addPoints(PointCloudPtr cloud)
 {
-    unique_lock<mutex> lock(mtx_load);
     auto numPoints = cloud->points.size();
     auto sparse_pointOffset = this->numPoints;
     int pointOffset = 0;
+    Point min, max;
+    pcl::getMinMax3D(*cloud, min, max);
+    Box cloud_bb({min.x, min.y, min.z}, {max.x, max.y, max.z});
+    vector<LoadTask> tasks;
     while (pointOffset < numPoints)
     {
         int64_t remaining = numPoints - pointOffset;
         int64_t taskPoints = std::min(int64_t(MAX_POINTS_PER_TASK), remaining);
 
         LoadTask task;
+        task.bb = cloud_bb;
         task.sparse_pointOffset = sparse_pointOffset;
         task.firstPoint = pointOffset;
         task.numPoints = taskPoints;
         task.source = cloud;
         task.cloudIdx = this->numClouds;
-        loadTasks.push_back(task);
+        tasks.push_back(task);
 
         pointOffset += taskPoints;
     }
@@ -435,11 +436,16 @@ void PointManager::addPoints(PointCloudPtr cloud)
     this->numPoints += numPoints;
     this->numBatches += numBatches;
     this->numClouds++;
-    this->boxes.push_back(cloud->box);
-
-    // compute global bounding box
-    bb.min = glm::min(bb.min, cloud->box.min);
-    bb.max = glm::max(bb.max, cloud->box.max);
+    this->boxes.push_back(cloud_bb);
+    this->bb.expand(cloud_bb);
+    {
+        unique_lock<mutex> lock(mtx_load);
+        for (auto task : tasks)
+        {
+            loadTasks.push_back(task);
+        }
+        std::cout << "queued " << numPoints << " points with " << tasks.size() << " tasks" << std::endl;
+    }
 }
 
 void PointManager::clearPoints()
