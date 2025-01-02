@@ -444,7 +444,6 @@ void PointManager::addPoints(PointCloudPtr cloud)
         {
             loadTasks.push_back(task);
         }
-        std::cout << "queued " << numPoints << " points with " << tasks.size() << " tasks" << std::endl;
     }
 }
 
